@@ -1,0 +1,26 @@
+[
+  {
+    "model": "security.models.CompanyBranch",
+    "pk": 1,
+    "fields": {
+      "company_id": 1,
+      "name": "Sede 1",
+      "short_name": "Sede principal",
+      "address": "Guayas, Km 5 ½ vía Durán Yaguachi.",
+      "is_current": true,
+      "is_main": true
+    }
+  },
+  {
+    "model": "security.models.CompanyBranch",
+    "pk": 2,
+    "fields": {
+      "company_id": 1,
+      "name": "Sede 2",
+      "short_name": "Sede 2",
+      "address": "Guayas, Km 5 ½ vía Durán Yaguachi.",
+      "is_current": true,
+      "is_main": false
+    }
+  }
+]

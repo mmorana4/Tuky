@@ -1,0 +1,686 @@
+Listado de rutas de carpetas para el volumen Unidad D
+El número de serie del volumen es 3C3F-FA3F
+D:.
+│   estructura.txt
+│   
+├───core-service-ms
+│   │   .env
+│   │   db.sqlite3
+│   │   manage.py
+│   │   requirements.txt
+│   │   
+│   ├───.idea
+│   │   │   .gitignore
+│   │   │   core-service-ms.iml
+│   │   │   misc.xml
+│   │   │   modules.xml
+│   │   │   vcs.xml
+│   │   │   workspace.xml
+│   │   │   
+│   │   └───inspectionProfiles
+│   │           profiles_settings.xml
+│   │           Project_Default.xml
+│   │           
+│   ├───api
+│   │   │   urls.py
+│   │   │   version.py
+│   │   │   __init__.py
+│   │   │   
+│   │   ├───v1_0_0
+│   │   │   │   urls.py
+│   │   │   │   __init__.py
+│   │   │   │   
+│   │   │   ├───auth
+│   │   │   │   │   serializers.py
+│   │   │   │   │   urls.py
+│   │   │   │   │   views.py
+│   │   │   │   │   __init__.py
+│   │   │   │   │   
+│   │   │   │   ├───business
+│   │   │   │   │   │   auth_service.py
+│   │   │   │   │   │   oauth_service.py
+│   │   │   │   │   │   __init__.py
+│   │   │   │   │   │   
+│   │   │   │   │   └───__pycache__
+│   │   │   │   │           auth_service.cpython-39.pyc
+│   │   │   │   │           oauth_service.cpython-39.pyc
+│   │   │   │   │           __init__.cpython-39.pyc
+│   │   │   │   │           
+│   │   │   │   ├───controllers
+│   │   │   │   │   │   auth_controller.py
+│   │   │   │   │   │   oauth_controller.py
+│   │   │   │   │   │   __init__.py
+│   │   │   │   │   │   
+│   │   │   │   │   └───__pycache__
+│   │   │   │   │           auth_controller.cpython-39.pyc
+│   │   │   │   │           oauth_controller.cpython-39.pyc
+│   │   │   │   │           __init__.cpython-39.pyc
+│   │   │   │   │           
+│   │   │   │   └───__pycache__
+│   │   │   │           urls.cpython-39.pyc
+│   │   │   │           views.cpython-39.pyc
+│   │   │   │           __init__.cpython-39.pyc
+│   │   │   │           
+│   │   │   ├───security
+│   │   │   │   │   urls.py
+│   │   │   │   │   __init__.py
+│   │   │   │   │   
+│   │   │   │   ├───branch
+│   │   │   │   │       controller.py
+│   │   │   │   │       forms.py
+│   │   │   │   │       serializers.py
+│   │   │   │   │       service.py
+│   │   │   │   │       views.py
+│   │   │   │   │       __init__.py
+│   │   │   │   │       
+│   │   │   │   └───company
+│   │   │   │           controller.py
+│   │   │   │           forms.py
+│   │   │   │           serializers.py
+│   │   │   │           service.py
+│   │   │   │           views.py
+│   │   │   │           __init__.py
+│   │   │   │           
+│   │   │   ├───session
+│   │   │   │       controller.py
+│   │   │   │       serializers.py
+│   │   │   │       service.py
+│   │   │   │       urls.py
+│   │   │   │       views.py
+│   │   │   │       __init__.py
+│   │   │   │       
+│   │   │   └───__pycache__
+│   │   │           urls.cpython-39.pyc
+│   │   │           __init__.cpython-39.pyc
+│   │   │           
+│   │   └───__pycache__
+│   │           urls.cpython-39.pyc
+│   │           version.cpython-39.pyc
+│   │           __init__.cpython-39.pyc
+│   │           
+│   ├───core
+│   │   │   my_admin.py
+│   │   │   my_base.py
+│   │   │   my_business.py
+│   │   │   my_cache.py
+│   │   │   my_form.py
+│   │   │   my_model.py
+│   │   │   my_response.py
+│   │   │   __init__.py
+│   │   │   
+│   │   └───__pycache__
+│   │           my_admin.cpython-39.pyc
+│   │           my_base.cpython-39.pyc
+│   │           my_cache.cpython-39.pyc
+│   │           my_model.cpython-39.pyc
+│   │           my_response.cpython-39.pyc
+│   │           __init__.cpython-39.pyc
+│   │           
+│   ├───helpers
+│   │   │   choices_helper.py
+│   │   │   decorators_helper.py
+│   │   │   functions_helper.py
+│   │   │   model_helper.py
+│   │   │   response_helper.py
+│   │   │   service_helper.py
+│   │   │   swagger_helper.py
+│   │   │   __init__.py
+│   │   │   
+│   │   └───__pycache__
+│   │           choices_helper.cpython-39.pyc
+│   │           functions_helper.cpython-39.pyc
+│   │           model_helper.cpython-39.pyc
+│   │           response_helper.cpython-39.pyc
+│   │           __init__.cpython-39.pyc
+│   │           
+│   ├───security
+│   │   │   admin.py
+│   │   │   apps.py
+│   │   │   context_processors.py
+│   │   │   middleware.py
+│   │   │   models.py
+│   │   │   __init__.py
+│   │   │   
+│   │   ├───fixtures
+│   │   │       initial_auth_method.json
+│   │   │       initial_company.json
+│   │   │       initial_company_branch.json
+│   │   │       initial_permission.json
+│   │   │       initial_role.json
+│   │   │       
+│   │   ├───migrations
+│   │   │   │   0001_initial.py
+│   │   │   │   0002_remove_user_created_at_remove_user_created_by_and_more.py
+│   │   │   │   0003_user_created_at_user_created_by_user_updated_at_and_more.py
+│   │   │   │   0004_alter_authmethod_id_alter_company_id_and_more.py
+│   │   │   │   0005_remove_user_avatar_url_remove_user_github_id_and_more.py
+│   │   │   │   0006_remove_userprovider_provider_id_userprovider_token.py
+│   │   │   │   0007_alter_userprovider_token_usersession.py
+│   │   │   │   0008_alter_usersession_expires_at.py
+│   │   │   │   0009_role_route_delete_authmethod.py
+│   │   │   │   0010_alter_role_code_alter_role_route.py
+│   │   │   │   __init__.py
+│   │   │   │   
+│   │   │   └───__pycache__
+│   │   │           0001_initial.cpython-39.pyc
+│   │   │           0002_remove_user_created_at_remove_user_created_by_and_more.cpython-39.pyc
+│   │   │           0003_user_created_at_user_created_by_user_updated_at_and_more.cpython-39.pyc
+│   │   │           0004_alter_authmethod_id_alter_company_id_and_more.cpython-39.pyc
+│   │   │           0005_remove_user_avatar_url_remove_user_github_id_and_more.cpython-39.pyc
+│   │   │           0006_remove_userprovider_provider_id_userprovider_token.cpython-39.pyc
+│   │   │           0007_alter_userprovider_token_usersession.cpython-39.pyc
+│   │   │           0008_alter_usersession_expires_at.cpython-39.pyc
+│   │   │           0009_role_route_delete_authmethod.cpython-39.pyc
+│   │   │           0010_alter_role_code_alter_role_route.cpython-39.pyc
+│   │   │           __init__.cpython-39.pyc
+│   │   │           
+│   │   └───__pycache__
+│   │           admin.cpython-39.pyc
+│   │           apps.cpython-39.pyc
+│   │           context_processors.cpython-39.pyc
+│   │           models.cpython-39.pyc
+│   │           __init__.cpython-39.pyc
+│   │           
+│   ├───server
+│   │   │   asgi.py
+│   │   │   settings.py
+│   │   │   urls.py
+│   │   │   wsgi.py
+│   │   │   __init__.py
+│   │   │   
+│   │   └───__pycache__
+│   │           settings.cpython-39.pyc
+│   │           urls.cpython-39.pyc
+│   │           __init__.cpython-39.pyc
+│   │           
+│   ├───static
+│   │   ├───admin
+│   │   │   ├───css
+│   │   │   │   │   autocomplete.css
+│   │   │   │   │   base.css
+│   │   │   │   │   changelists.css
+│   │   │   │   │   dark_mode.css
+│   │   │   │   │   dashboard.css
+│   │   │   │   │   forms.css
+│   │   │   │   │   login.css
+│   │   │   │   │   nav_sidebar.css
+│   │   │   │   │   responsive.css
+│   │   │   │   │   responsive_rtl.css
+│   │   │   │   │   rtl.css
+│   │   │   │   │   widgets.css
+│   │   │   │   │   
+│   │   │   │   └───vendor
+│   │   │   │       └───select2
+│   │   │   │               LICENSE-SELECT2.md
+│   │   │   │               select2.css
+│   │   │   │               select2.min.css
+│   │   │   │               
+│   │   │   ├───img
+│   │   │   │   │   calendar-icons.svg
+│   │   │   │   │   icon-addlink.svg
+│   │   │   │   │   icon-alert.svg
+│   │   │   │   │   icon-calendar.svg
+│   │   │   │   │   icon-changelink.svg
+│   │   │   │   │   icon-clock.svg
+│   │   │   │   │   icon-deletelink.svg
+│   │   │   │   │   icon-no.svg
+│   │   │   │   │   icon-unknown-alt.svg
+│   │   │   │   │   icon-unknown.svg
+│   │   │   │   │   icon-viewlink.svg
+│   │   │   │   │   icon-yes.svg
+│   │   │   │   │   inline-delete.svg
+│   │   │   │   │   LICENSE
+│   │   │   │   │   README.txt
+│   │   │   │   │   search.svg
+│   │   │   │   │   selector-icons.svg
+│   │   │   │   │   sorting-icons.svg
+│   │   │   │   │   tooltag-add.svg
+│   │   │   │   │   tooltag-arrowright.svg
+│   │   │   │   │   
+│   │   │   │   └───gis
+│   │   │   │           move_vertex_off.svg
+│   │   │   │           move_vertex_on.svg
+│   │   │   │           
+│   │   │   └───js
+│   │   │       │   actions.js
+│   │   │       │   autocomplete.js
+│   │   │       │   calendar.js
+│   │   │       │   cancel.js
+│   │   │       │   change_form.js
+│   │   │       │   collapse.js
+│   │   │       │   core.js
+│   │   │       │   filters.js
+│   │   │       │   inlines.js
+│   │   │       │   jquery.init.js
+│   │   │       │   nav_sidebar.js
+│   │   │       │   popup_response.js
+│   │   │       │   prepopulate.js
+│   │   │       │   prepopulate_init.js
+│   │   │       │   SelectBox.js
+│   │   │       │   SelectFilter2.js
+│   │   │       │   theme.js
+│   │   │       │   urlify.js
+│   │   │       │   
+│   │   │       ├───admin
+│   │   │       │       DateTimeShortcuts.js
+│   │   │       │       RelatedObjectLookups.js
+│   │   │       │       
+│   │   │       └───vendor
+│   │   │           ├───jquery
+│   │   │           │       jquery.js
+│   │   │           │       jquery.min.js
+│   │   │           │       LICENSE.txt
+│   │   │           │       
+│   │   │           ├───select2
+│   │   │           │   │   LICENSE.md
+│   │   │           │   │   select2.full.js
+│   │   │           │   │   select2.full.min.js
+│   │   │           │   │   
+│   │   │           │   └───i18n
+│   │   │           │           af.js
+│   │   │           │           ar.js
+│   │   │           │           az.js
+│   │   │           │           bg.js
+│   │   │           │           bn.js
+│   │   │           │           bs.js
+│   │   │           │           ca.js
+│   │   │           │           cs.js
+│   │   │           │           da.js
+│   │   │           │           de.js
+│   │   │           │           dsb.js
+│   │   │           │           el.js
+│   │   │           │           en.js
+│   │   │           │           es.js
+│   │   │           │           et.js
+│   │   │           │           eu.js
+│   │   │           │           fa.js
+│   │   │           │           fi.js
+│   │   │           │           fr.js
+│   │   │           │           gl.js
+│   │   │           │           he.js
+│   │   │           │           hi.js
+│   │   │           │           hr.js
+│   │   │           │           hsb.js
+│   │   │           │           hu.js
+│   │   │           │           hy.js
+│   │   │           │           id.js
+│   │   │           │           is.js
+│   │   │           │           it.js
+│   │   │           │           ja.js
+│   │   │           │           ka.js
+│   │   │           │           km.js
+│   │   │           │           ko.js
+│   │   │           │           lt.js
+│   │   │           │           lv.js
+│   │   │           │           mk.js
+│   │   │           │           ms.js
+│   │   │           │           nb.js
+│   │   │           │           ne.js
+│   │   │           │           nl.js
+│   │   │           │           pl.js
+│   │   │           │           ps.js
+│   │   │           │           pt-BR.js
+│   │   │           │           pt.js
+│   │   │           │           ro.js
+│   │   │           │           ru.js
+│   │   │           │           sk.js
+│   │   │           │           sl.js
+│   │   │           │           sq.js
+│   │   │           │           sr-Cyrl.js
+│   │   │           │           sr.js
+│   │   │           │           sv.js
+│   │   │           │           th.js
+│   │   │           │           tk.js
+│   │   │           │           tr.js
+│   │   │           │           uk.js
+│   │   │           │           vi.js
+│   │   │           │           zh-CN.js
+│   │   │           │           zh-TW.js
+│   │   │           │           
+│   │   │           └───xregexp
+│   │   │                   LICENSE.txt
+│   │   │                   xregexp.js
+│   │   │                   xregexp.min.js
+│   │   │                   
+│   │   ├───drf-yasg
+│   │   │   │   immutable.js
+│   │   │   │   immutable.min.js
+│   │   │   │   insQ.js
+│   │   │   │   insQ.min.js
+│   │   │   │   README
+│   │   │   │   redoc-init.js
+│   │   │   │   style.css
+│   │   │   │   swagger-ui-init.js
+│   │   │   │   
+│   │   │   ├───redoc
+│   │   │   │       LICENSE
+│   │   │   │       redoc-logo.png
+│   │   │   │       redoc.min.js
+│   │   │   │       redoc.standalone.js.map
+│   │   │   │       
+│   │   │   ├───redoc-old
+│   │   │   │       LICENSE
+│   │   │   │       redoc.min.js
+│   │   │   │       redoc.min.js.map
+│   │   │   │       
+│   │   │   └───swagger-ui-dist
+│   │   │           absolute-path.js
+│   │   │           favicon-32x32.png
+│   │   │           index.css
+│   │   │           index.js
+│   │   │           LICENSE
+│   │   │           NOTICE
+│   │   │           oauth2-redirect.html
+│   │   │           swagger-initializer.js
+│   │   │           swagger-ui-bundle.js
+│   │   │           swagger-ui-bundle.js.map
+│   │   │           swagger-ui-es-bundle-core.js
+│   │   │           swagger-ui-es-bundle-core.js.map
+│   │   │           swagger-ui-es-bundle.js
+│   │   │           swagger-ui-es-bundle.js.map
+│   │   │           swagger-ui-standalone-preset.js
+│   │   │           swagger-ui-standalone-preset.js.map
+│   │   │           swagger-ui.css
+│   │   │           swagger-ui.css.map
+│   │   │           swagger-ui.js.map
+│   │   │           
+│   │   └───rest_framework
+│   │       ├───css
+│   │       │       bootstrap-theme.min.css
+│   │       │       bootstrap-theme.min.css.map
+│   │       │       bootstrap-tweaks.css
+│   │       │       bootstrap.min.css
+│   │       │       bootstrap.min.css.map
+│   │       │       default.css
+│   │       │       font-awesome-4.0.3.css
+│   │       │       prettify.css
+│   │       │       
+│   │       ├───docs
+│   │       │   ├───css
+│   │       │   │       base.css
+│   │       │   │       highlight.css
+│   │       │   │       jquery.json-view.min.css
+│   │       │   │       
+│   │       │   ├───img
+│   │       │   │       favicon.ico
+│   │       │   │       grid.png
+│   │       │   │       
+│   │       │   └───js
+│   │       │           api.js
+│   │       │           highlight.pack.js
+│   │       │           jquery.json-view.min.js
+│   │       │           
+│   │       ├───fonts
+│   │       │       fontawesome-webfont.eot
+│   │       │       fontawesome-webfont.svg
+│   │       │       fontawesome-webfont.ttf
+│   │       │       fontawesome-webfont.woff
+│   │       │       glyphicons-halflings-regular.eot
+│   │       │       glyphicons-halflings-regular.svg
+│   │       │       glyphicons-halflings-regular.ttf
+│   │       │       glyphicons-halflings-regular.woff
+│   │       │       glyphicons-halflings-regular.woff2
+│   │       │       
+│   │       ├───img
+│   │       │       glyphicons-halflings-white.png
+│   │       │       glyphicons-halflings.png
+│   │       │       grid.png
+│   │       │       
+│   │       └───js
+│   │               ajax-form.js
+│   │               bootstrap.min.js
+│   │               coreapi-0.1.1.js
+│   │               csrf.js
+│   │               default.js
+│   │               jquery-3.7.1.min.js
+│   │               load-ajax-form.js
+│   │               prettify-min.js
+│   │               
+│   ├───staticfiles
+│   │   ├───admin
+│   │   │   ├───css
+│   │   │   │   │   autocomplete.css
+│   │   │   │   │   base.css
+│   │   │   │   │   changelists.css
+│   │   │   │   │   dark_mode.css
+│   │   │   │   │   dashboard.css
+│   │   │   │   │   forms.css
+│   │   │   │   │   login.css
+│   │   │   │   │   nav_sidebar.css
+│   │   │   │   │   responsive.css
+│   │   │   │   │   responsive_rtl.css
+│   │   │   │   │   rtl.css
+│   │   │   │   │   widgets.css
+│   │   │   │   │   
+│   │   │   │   └───vendor
+│   │   │   │       └───select2
+│   │   │   │               LICENSE-SELECT2.md
+│   │   │   │               select2.css
+│   │   │   │               select2.min.css
+│   │   │   │               
+│   │   │   ├───img
+│   │   │   │   │   calendar-icons.svg
+│   │   │   │   │   icon-addlink.svg
+│   │   │   │   │   icon-alert.svg
+│   │   │   │   │   icon-calendar.svg
+│   │   │   │   │   icon-changelink.svg
+│   │   │   │   │   icon-clock.svg
+│   │   │   │   │   icon-deletelink.svg
+│   │   │   │   │   icon-no.svg
+│   │   │   │   │   icon-unknown-alt.svg
+│   │   │   │   │   icon-unknown.svg
+│   │   │   │   │   icon-viewlink.svg
+│   │   │   │   │   icon-yes.svg
+│   │   │   │   │   inline-delete.svg
+│   │   │   │   │   LICENSE
+│   │   │   │   │   README.txt
+│   │   │   │   │   search.svg
+│   │   │   │   │   selector-icons.svg
+│   │   │   │   │   sorting-icons.svg
+│   │   │   │   │   tooltag-add.svg
+│   │   │   │   │   tooltag-arrowright.svg
+│   │   │   │   │   
+│   │   │   │   └───gis
+│   │   │   │           move_vertex_off.svg
+│   │   │   │           move_vertex_on.svg
+│   │   │   │           
+│   │   │   └───js
+│   │   │       │   actions.js
+│   │   │       │   autocomplete.js
+│   │   │       │   calendar.js
+│   │   │       │   cancel.js
+│   │   │       │   change_form.js
+│   │   │       │   collapse.js
+│   │   │       │   core.js
+│   │   │       │   filters.js
+│   │   │       │   inlines.js
+│   │   │       │   jquery.init.js
+│   │   │       │   nav_sidebar.js
+│   │   │       │   popup_response.js
+│   │   │       │   prepopulate.js
+│   │   │       │   prepopulate_init.js
+│   │   │       │   SelectBox.js
+│   │   │       │   SelectFilter2.js
+│   │   │       │   theme.js
+│   │   │       │   urlify.js
+│   │   │       │   
+│   │   │       ├───admin
+│   │   │       │       DateTimeShortcuts.js
+│   │   │       │       RelatedObjectLookups.js
+│   │   │       │       
+│   │   │       └───vendor
+│   │   │           ├───jquery
+│   │   │           │       jquery.js
+│   │   │           │       jquery.min.js
+│   │   │           │       LICENSE.txt
+│   │   │           │       
+│   │   │           ├───select2
+│   │   │           │   │   LICENSE.md
+│   │   │           │   │   select2.full.js
+│   │   │           │   │   select2.full.min.js
+│   │   │           │   │   
+│   │   │           │   └───i18n
+│   │   │           │           af.js
+│   │   │           │           ar.js
+│   │   │           │           az.js
+│   │   │           │           bg.js
+│   │   │           │           bn.js
+│   │   │           │           bs.js
+│   │   │           │           ca.js
+│   │   │           │           cs.js
+│   │   │           │           da.js
+│   │   │           │           de.js
+│   │   │           │           dsb.js
+│   │   │           │           el.js
+│   │   │           │           en.js
+│   │   │           │           es.js
+│   │   │           │           et.js
+│   │   │           │           eu.js
+│   │   │           │           fa.js
+│   │   │           │           fi.js
+│   │   │           │           fr.js
+│   │   │           │           gl.js
+│   │   │           │           he.js
+│   │   │           │           hi.js
+│   │   │           │           hr.js
+│   │   │           │           hsb.js
+│   │   │           │           hu.js
+│   │   │           │           hy.js
+│   │   │           │           id.js
+│   │   │           │           is.js
+│   │   │           │           it.js
+│   │   │           │           ja.js
+│   │   │           │           ka.js
+│   │   │           │           km.js
+│   │   │           │           ko.js
+│   │   │           │           lt.js
+│   │   │           │           lv.js
+│   │   │           │           mk.js
+│   │   │           │           ms.js
+│   │   │           │           nb.js
+│   │   │           │           ne.js
+│   │   │           │           nl.js
+│   │   │           │           pl.js
+│   │   │           │           ps.js
+│   │   │           │           pt-BR.js
+│   │   │           │           pt.js
+│   │   │           │           ro.js
+│   │   │           │           ru.js
+│   │   │           │           sk.js
+│   │   │           │           sl.js
+│   │   │           │           sq.js
+│   │   │           │           sr-Cyrl.js
+│   │   │           │           sr.js
+│   │   │           │           sv.js
+│   │   │           │           th.js
+│   │   │           │           tk.js
+│   │   │           │           tr.js
+│   │   │           │           uk.js
+│   │   │           │           vi.js
+│   │   │           │           zh-CN.js
+│   │   │           │           zh-TW.js
+│   │   │           │           
+│   │   │           └───xregexp
+│   │   │                   LICENSE.txt
+│   │   │                   xregexp.js
+│   │   │                   xregexp.min.js
+│   │   │                   
+│   │   ├───drf-yasg
+│   │   │   │   immutable.js
+│   │   │   │   immutable.min.js
+│   │   │   │   insQ.js
+│   │   │   │   insQ.min.js
+│   │   │   │   README
+│   │   │   │   redoc-init.js
+│   │   │   │   style.css
+│   │   │   │   swagger-ui-init.js
+│   │   │   │   
+│   │   │   ├───redoc
+│   │   │   │       LICENSE
+│   │   │   │       redoc-logo.png
+│   │   │   │       redoc.min.js
+│   │   │   │       redoc.standalone.js.map
+│   │   │   │       
+│   │   │   ├───redoc-old
+│   │   │   │       LICENSE
+│   │   │   │       redoc.min.js
+│   │   │   │       redoc.min.js.map
+│   │   │   │       
+│   │   │   └───swagger-ui-dist
+│   │   │           absolute-path.js
+│   │   │           favicon-32x32.png
+│   │   │           index.css
+│   │   │           index.js
+│   │   │           LICENSE
+│   │   │           NOTICE
+│   │   │           oauth2-redirect.html
+│   │   │           swagger-initializer.js
+│   │   │           swagger-ui-bundle.js
+│   │   │           swagger-ui-bundle.js.map
+│   │   │           swagger-ui-es-bundle-core.js
+│   │   │           swagger-ui-es-bundle-core.js.map
+│   │   │           swagger-ui-es-bundle.js
+│   │   │           swagger-ui-es-bundle.js.map
+│   │   │           swagger-ui-standalone-preset.js
+│   │   │           swagger-ui-standalone-preset.js.map
+│   │   │           swagger-ui.css
+│   │   │           swagger-ui.css.map
+│   │   │           swagger-ui.js.map
+│   │   │           
+│   │   └───rest_framework
+│   │       ├───css
+│   │       │       bootstrap-theme.min.css
+│   │       │       bootstrap-theme.min.css.map
+│   │       │       bootstrap-tweaks.css
+│   │       │       bootstrap.min.css
+│   │       │       bootstrap.min.css.map
+│   │       │       default.css
+│   │       │       font-awesome-4.0.3.css
+│   │       │       prettify.css
+│   │       │       
+│   │       ├───docs
+│   │       │   ├───css
+│   │       │   │       base.css
+│   │       │   │       highlight.css
+│   │       │   │       jquery.json-view.min.css
+│   │       │   │       
+│   │       │   ├───img
+│   │       │   │       favicon.ico
+│   │       │   │       grid.png
+│   │       │   │       
+│   │       │   └───js
+│   │       │           api.js
+│   │       │           highlight.pack.js
+│   │       │           jquery.json-view.min.js
+│   │       │           
+│   │       ├───fonts
+│   │       │       fontawesome-webfont.eot
+│   │       │       fontawesome-webfont.svg
+│   │       │       fontawesome-webfont.ttf
+│   │       │       fontawesome-webfont.woff
+│   │       │       glyphicons-halflings-regular.eot
+│   │       │       glyphicons-halflings-regular.svg
+│   │       │       glyphicons-halflings-regular.ttf
+│   │       │       glyphicons-halflings-regular.woff
+│   │       │       glyphicons-halflings-regular.woff2
+│   │       │       
+│   │       ├───img
+│   │       │       glyphicons-halflings-white.png
+│   │       │       glyphicons-halflings.png
+│   │       │       grid.png
+│   │       │       
+│   │       └───js
+│   │               ajax-form.js
+│   │               bootstrap.min.js
+│   │               coreapi-0.1.1.js
+│   │               csrf.js
+│   │               default.js
+│   │               jquery-3.7.1.min.js
+│   │               load-ajax-form.js
+│   │               prettify-min.js
+│   │               
+│   └───templates
+└───shared
+    │   pyproject.toml
+    │   
+    └───commons

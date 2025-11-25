@@ -1,0 +1,10 @@
+[
+  {
+    "model": "security.models.AuthMethod",
+    "pk": 1,
+    "fields": {
+      "method": "both",
+      "is_current": true
+    }
+  }
+]

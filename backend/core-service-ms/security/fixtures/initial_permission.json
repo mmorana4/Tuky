@@ -1,0 +1,47 @@
+[
+  {
+    "model": "security.models.Permission",
+    "pk": 1,
+    "fields": {
+      "code": "can_access",
+      "name": "Puede acceder",
+      "is_current": true
+    }
+  },
+  {
+    "model": "security.models.Permission",
+    "pk": 2,
+    "fields": {
+      "code": "can_view",
+      "name": "Puede ver",
+      "is_current": true
+    }
+  },
+  {
+    "model": "security.models.Permission",
+    "pk": 3,
+    "fields": {
+      "code": "can_add",
+      "name": "Puede agregar",
+      "is_current": true
+    }
+  },
+  {
+    "model": "security.models.Permission",
+    "pk": 4,
+    "fields": {
+      "code": "can_edit",
+      "name": "Puede editar",
+      "is_current": true
+    }
+  },
+  {
+    "model": "security.models.Permission",
+    "pk": 5,
+    "fields": {
+      "code": "can_delete",
+      "name": "Puede eliminar",
+      "is_current": true
+    }
+  }
+]

@@ -1,0 +1,13 @@
+[
+  {
+    "model": "security.models.Company",
+    "pk": 1,
+    "fields": {
+      "ruc": "0993341169001",
+      "name": "Universidad Bolivariana del Ecuador",
+      "short_name": "UBE",
+      "website": "https://ube.edu.ec/",
+      "address": "Guayas, Km 5 ½ vía Durán Yaguachi."
+    }
+  }
+]

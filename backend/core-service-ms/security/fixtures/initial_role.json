@@ -1,0 +1,44 @@
+[
+  {
+    "model": "security.models.Role",
+    "pk": 1,
+    "fields": {
+      "code": "SYSTEM",
+      "route": "admin",
+      "name": "Sistema",
+      "legend": "Sistema",
+      "is_current": true,
+      "is_system": true,
+      "level_authority": "high",
+      "weight": 100
+    }
+  },
+  {
+    "model": "security.models.Role",
+    "pk": 2,
+    "fields": {
+      "code": "TEACHER",
+      "route": "teacher",
+      "name": "Profesor",
+      "legend": "Profesor",
+      "is_current": true,
+      "is_system": false,
+      "level_authority": "medium",
+      "weight": 70
+    }
+  },
+  {
+    "model": "security.models.Role",
+    "pk": 3,
+    "fields": {
+      "code": "STUDENT",
+      "route": "student",
+      "name": "Estudiante",
+      "legend": "Estudiante",
+      "is_current": true,
+      "is_system": false,
+      "level_authority": "low",
+      "weight": 30
+    }
+  }
+]
