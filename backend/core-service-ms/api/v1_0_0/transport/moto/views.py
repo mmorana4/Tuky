@@ -49,3 +49,5 @@ class MotoView(ViewSet):
         return controller.subir_foto(pk)
 
 
+
+

@@ -1,9 +1,9 @@
-import React, {createContext, useState, useEffect} from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import AuthService from '../services/authService';
 
 export const AuthContext = createContext({});
 
-export const AuthProvider = ({children}) => {
+export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -23,9 +23,15 @@ export const AuthProvider = ({children}) => {
   };
 
   const login = async (username, password) => {
+    console.log('AuthContext.login called');
     const result = await AuthService.login(username, password);
+    console.log('AuthService.login result:', result);
     if (result.success) {
+      console.log('Setting user in context:', result.user);
       setUser(result.user);
+      console.log('User state updated');
+    } else {
+      console.log('Login failed in AuthContext:', result.error);
     }
     return result;
   };
@@ -36,7 +42,7 @@ export const AuthProvider = ({children}) => {
   };
 
   return (
-    <AuthContext.Provider value={{user, loading, login, logout}}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -49,5 +55,7 @@ export const useAuth = () => {
   }
   return context;
 };
+
+
 
 

@@ -32,7 +32,7 @@ MY_REDIS_CACHE_CONFIG = {
 
 MY_IP_LOAD_BALANCED_INTERNAL = config('IP_LOAD_BALANCED_INTERNAL', default='127.0.0.1', cast=str)
 COOKIE_SESSION_NAME = config('COOKIE_SESSION_NAME', default='123456', cast=str)
-MY_ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+MY_ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=Csv())
 MY_TITLE_SYSTEM = 'core-service-ms'
 MY_TITLE_SYSTEM_KEY = ''
 MY_SERVER_RESPONSE = '211'

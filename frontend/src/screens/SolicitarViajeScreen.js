@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,11 +9,11 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import MapView, {Marker} from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
 import TransportService from '../services/transportService';
 
-export default function SolicitarViajeScreen({navigation}) {
+export default function SolicitarViajeScreen({ navigation }) {
   const [origen, setOrigen] = useState(null);
   const [destino, setDestino] = useState(null);
   const [precio, setPrecio] = useState('');
@@ -75,14 +75,16 @@ export default function SolicitarViajeScreen({navigation}) {
       metodo_pago: 'efectivo',
     };
 
+    console.log('Enviando solicitud:', JSON.stringify(data, null, 2));
     const result = await TransportService.crearSolicitud(data);
     setLoading(false);
+    console.log('Respuesta:', JSON.stringify(result, null, 2));
 
     if (result.success) {
       Alert.alert('Éxito', 'Solicitud creada correctamente', [
         {
           text: 'OK',
-          onPress: () => navigation.navigate('ViajeActivo', {viajeId: result.data.data.id}),
+          onPress: () => navigation.navigate('ViajeActivo', { viajeId: result.data.data.id }),
         },
       ]);
     } else {
@@ -112,6 +114,7 @@ export default function SolicitarViajeScreen({navigation}) {
         <TextInput
           style={styles.input}
           placeholder="Ej: 5.00"
+          placeholderTextColor="#999"
           value={precio}
           onChangeText={setPrecio}
           keyboardType="decimal-pad"
@@ -162,6 +165,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 20,
     fontSize: 16,
+    color: '#000',
   },
   button: {
     backgroundColor: '#FF6B35',
@@ -175,5 +179,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
+
 
 

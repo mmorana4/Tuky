@@ -14,3 +14,5 @@ class ConductorSerializer(HelperSerializerModel):
         read_only_fields = ['id', 'calificacion_promedio', 'total_viajes', 'ultima_actualizacion_ubicacion']
 
 
+
+

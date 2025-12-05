@@ -35,16 +35,15 @@ class CarreraController:
     def load(self):
         from .service import CarreraService
         from .forms import CarreraForm
+        frm = CarreraForm()
         try:
-            id = self.request.data.get('id', 0)
+            id = self.request.query_params.get('id', 0)
             service = CarreraService(request=self.request)
             o_bus = service.load(id)
             if not o_bus.is_success:
                 raise NameError(o_bus.message)
             data = o_bus.get_data()
-            frm = CarreraForm(data=data.get('carrera', {}))
-            if not frm.is_valid():
-                raise NameError("Debe ingresar la información en todos los campos.")
+            frm.initial = data.get('carrera', {})
             self.response.set_success(True)
             self.response.set_status(status.HTTP_200_OK)
             self.response.set_form('Carrera', frm.toArray())
@@ -58,9 +57,13 @@ class CarreraController:
     def save(self):
         from .service import CarreraService
         from .forms import CarreraForm
+        from django.http import QueryDict
+        frm = CarreraForm()
         with transaction.atomic():
             try:
                 data = self.request.data
+                if isinstance(data, QueryDict):
+                    data = data.dict()
                 frm = CarreraForm(data=data.get('carrera', {}))
                 if not frm.is_valid():
                     raise NameError("Debe ingresar la información en todos los campos.")

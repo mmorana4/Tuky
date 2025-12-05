@@ -8,3 +8,5 @@ class CalificacionForm(forms.ModelForm):
         fields = ['viaje', 'calificado', 'puntuacion', 'comentario']
 
 
+
+

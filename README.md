@@ -1,189 +1,224 @@
-# Tuky Motos - Aplicación de Transporte en Moto
+# Tuky Motos
 
-Aplicación móvil tipo InDrive para transporte en motocicletas. Permite a los usuarios solicitar viajes y a los conductores aceptarlos, con seguimiento en tiempo real y sistema de calificaciones.
+Aplicación de transporte de pasajeros en motocicleta para Guayaquil, Ecuador.
 
-## 🏗️ Estructura del Proyecto
+## 📋 Requisitos Previos
+
+### Backend
+- Docker Desktop instalado y corriendo
+- Docker Compose
+- Puerto 8000 disponible
+
+### Frontend (React Native - Android)
+- Node.js v18 o superior
+- npm o yarn
+- Android Studio con SDK instalado
+- Java JDK 17
+- Un dispositivo Android físico o emulador configurado
+- Android SDK Platform 34
+- Android Build Tools 34.0.0
+
+## 🚀 Instalación y Ejecución
+
+### 1. Backend (Django + PostgreSQL + Redis)
+
+```bash
+# Navegar a la carpeta raíz del proyecto
+cd c:\Users\Miller\Desktop\Tuky
+
+# Crear archivo .env si no existe (ya debería existir)
+# El archivo .env ya está configurado con las variables necesarias
+
+# Levantar los servicios con Docker Compose
+docker-compose up -d
+
+# Verificar que los contenedores estén corriendo
+docker-compose ps
+
+# Ver logs del backend (opcional)
+docker-compose logs -f core-service
+```
+
+**Servicios que se levantan:**
+- PostgreSQL en puerto 5432
+- Redis en puerto 6379
+- Backend Django en puerto 8000
+
+**Crear usuario administrador:**
+```bash
+# Ejecutar script de creación de usuario
+docker-compose exec core-service python create_admin.py
+```
+
+### 2. Frontend (React Native - Android)
+
+```bash
+# Navegar a la carpeta del frontend
+cd frontend
+
+# Instalar dependencias
+npm install
+
+# Iniciar el Metro bundler
+npx react-native start
+
+# En otra terminal, instalar y ejecutar en Android
+npx react-native run-android
+```
+
+**Configuración importante:**
+- El frontend está configurado para conectarse a `http://192.168.1.101:8000`
+- Asegúrate de que tu celular y PC estén en la misma red WiFi
+- Si tu IP es diferente, edita `frontend/src/utils/config.js`
+
+## 🔑 Credenciales de Prueba
+
+**Usuario Administrador:**
+- Username: `admin`
+- Password: `admin123`
+
+## 📱 Permisos de Android
+
+La aplicación solicitará los siguientes permisos:
+- **Ubicación**: Para mostrar tu ubicación en el mapa y solicitar viajes
+- **Internet**: Para comunicarse con el backend
+
+## 🛠️ Comandos Útiles
+
+### Backend
+
+```bash
+# Detener todos los servicios
+docker-compose down
+
+# Reconstruir y reiniciar servicios
+docker-compose up -d --build
+
+# Ver logs de un servicio específico
+docker-compose logs -f core-service
+
+# Ejecutar comandos Django en el contenedor
+docker-compose exec core-service python manage.py <comando>
+
+# Acceder a la shell de Django
+docker-compose exec core-service python manage.py shell
+```
+
+### Frontend
+
+```bash
+# Limpiar cache y reinstalar
+cd frontend
+rm -rf node_modules
+npm install
+
+# Limpiar build de Android
+cd android
+./gradlew clean
+cd ..
+
+# Reiniciar Metro bundler con cache limpio
+npx react-native start --reset-cache
+
+# Ver logs de Android en tiempo real
+npx react-native log-android
+```
+
+## 🐛 Solución de Problemas
+
+### Backend
+
+**Error: Puerto 8000 ya está en uso**
+```bash
+# En Windows PowerShell
+netstat -ano | findstr :8000
+taskkill /PID <PID> /F
+```
+
+**Error: DisallowedHost**
+- El backend ya está configurado con `ALLOWED_HOSTS = *`
+- Si persiste, verifica el archivo `backend/core-service-ms/core/my_base.py`
+
+### Frontend
+
+**Error: Unable to load script**
+- Asegúrate de que Metro bundler esté corriendo (`npx react-native start`)
+- Verifica que el puerto 8081 esté disponible
+
+**Error: INSTALL_FAILED_USER_RESTRICTED**
+- En el celular, ve a Configuración > Opciones de desarrollador
+- Activa "Instalación por USB"
+- Desactiva "Verificar apps por USB"
+
+**Error: SDK location not found**
+- Crea el archivo `frontend/android/local.properties`:
+```
+sdk.dir=C\:\\Users\\<TU_USUARIO>\\AppData\\Local\\Android\\Sdk
+```
+
+**La app no se conecta al backend**
+1. Verifica que estés en la misma red WiFi
+2. Encuentra tu IP local:
+   ```bash
+   ipconfig
+   # Busca IPv4 Address
+   ```
+3. Actualiza `frontend/src/utils/config.js` con tu IP
+
+**Texto invisible en los inputs**
+- Ya está corregido con `color: '#000'` y `placeholderTextColor="#999"`
+- Si persiste, recarga la app agitando el celular y seleccionando "Reload"
+
+## 📚 Estructura del Proyecto
 
 ```
 Tuky/
 ├── backend/
-│   └── core-service-ms/          # Backend Django REST Framework
-│       ├── api/
-│       │   └── v1_0_0/
-│       │       ├── transport/    # APIs de transporte
-│       │       │   ├── solicitud/ # Gestión de solicitudes
-│       │       │   └── viaje/    # Gestión de viajes
-│       │       └── auth/         # Autenticación
-│       └── security/
-│           └── models.py         # Modelos de datos (Moto, Conductor, Viaje, etc.)
-│
-└── frontend/                      # Aplicación móvil React Native
-    └── src/
-        ├── screens/              # Pantallas de la app
-        ├── navigation/           # Navegación
-        ├── services/             # Servicios API
-        └── context/              # Contextos React
+│   └── core-service-ms/          # Backend Django
+│       ├── api/                   # Endpoints REST
+│       ├── security/              # Modelos de usuarios y autenticación
+│       ├── server/                # Configuración Django
+│       ├── create_admin.py        # Script para crear usuario admin
+│       └── requirements.txt       # Dependencias Python
+├── frontend/
+│   ├── src/
+│   │   ├── screens/              # Pantallas de la app
+│   │   ├── services/             # Servicios API
+│   │   ├── context/              # Context API (Auth, etc.)
+│   │   └── navigation/           # Configuración de navegación
+│   ├── android/                  # Código nativo Android
+│   └── package.json              # Dependencias npm
+├── docker-compose.yml            # Orquestación de servicios
+├── .env                          # Variables de entorno
+└── README.md                     # Este archivo
 ```
 
-## 🚀 Características Principales
+## 🌐 URLs Importantes
 
-### Para Pasajeros
-- ✅ Solicitar viajes indicando origen y destino en el mapa
-- ✅ Ofrecer precio personalizado
-- ✅ Ver solicitudes disponibles cerca
-- ✅ Seguimiento en tiempo real del viaje
-- ✅ Calificar al conductor después del viaje
-- ✅ Historial de viajes
+- Backend API: `http://192.168.1.101:8000`
+- Swagger Docs: `http://192.168.1.101:8000/swagger/`
+- Admin Django: `http://192.168.1.101:8000/admin/`
 
-### Para Conductores
-- ✅ Ver solicitudes de viaje disponibles
-- ✅ Aceptar solicitudes de viaje
-- ✅ Gestionar motos registradas
-- ✅ Actualizar ubicación en tiempo real
-- ✅ Iniciar y completar viajes
-- ✅ Sistema de calificaciones
+## 📝 Notas de Desarrollo
 
-## 📋 Modelos de Datos
+- React Native version: 0.72.6
+- Android SDK: 34
+- Python: 3.11
+- Django: Versión especificada en requirements.txt
+- PostgreSQL: Latest
+- Redis: Latest
 
-### Moto
-- Marca, modelo, año, placa, color
-- Cilindrada
-- Foto de la moto
-- Verificación de documentos
+## 🤝 Contribuir
 
-### Conductor
-- Perfil extendido del usuario
-- Licencia de conducir
-- Calificación promedio
-- Estado (disponible, en viaje, no disponible)
-- Ubicación actual (lat/lng)
-
-### Viaje
-- Pasajero y conductor
-- Moto utilizada
-- Origen y destino (coordenadas y dirección)
-- Precio solicitado y precio final
-- Método de pago
-- Estados: solicitado, aceptado, en_camino_origen, llegado_origen, en_viaje, completado, cancelado
-- Calificaciones mutuas
-
-### SolicitudViaje
-- Solicitudes pendientes de ser aceptadas
-- Expiración automática
-- Ubicaciones y precio
-
-## 🔧 Tecnologías Utilizadas
-
-### Backend
-- **Django 4.x** - Framework web
-- **Django REST Framework** - API REST
-- **PostgreSQL** - Base de datos
-- **JWT** - Autenticación
-
-### Frontend
-- **React Native 0.72** - Framework móvil
-- **React Navigation** - Navegación
-- **React Native Maps** - Mapas
-- **Axios** - Cliente HTTP
-- **React Native Paper** - UI Components
-- **AsyncStorage** - Almacenamiento local
-
-## 📦 Instalación
-
-### Backend
-
-```bash
-cd backend/core-service-ms
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py runserver
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-# Para Android
-npm run android
-# Para iOS
-npm run ios
-```
-
-## 🔌 APIs Principales
-
-### Solicitudes de Viaje
-- `POST /api/v1_0_0/transport/solicitudes/crear/` - Crear solicitud
-- `GET /api/v1_0_0/transport/solicitudes/disponibles/` - Listar disponibles
-- `POST /api/v1_0_0/transport/solicitudes/aceptar/` - Aceptar solicitud
-- `POST /api/v1_0_0/transport/solicitudes/cancelar/` - Cancelar solicitud
-
-### Viajes
-- `GET /api/v1_0_0/transport/viajes/mis_viajes/` - Mis viajes
-- `GET /api/v1_0_0/transport/viajes/{id}/detalle/` - Detalle del viaje
-- `POST /api/v1_0_0/transport/viajes/{id}/iniciar/` - Iniciar viaje
-- `POST /api/v1_0_0/transport/viajes/{id}/completar/` - Completar viaje
-- `POST /api/v1_0_0/transport/viajes/{id}/cancelar/` - Cancelar viaje
-
-## 🗺️ Flujo de la Aplicación
-
-1. **Pasajero solicita viaje**
-   - Selecciona origen y destino en el mapa
-   - Ofrece un precio
-   - Se crea una SolicitudViaje
-
-2. **Conductor acepta solicitud**
-   - Ve solicitudes disponibles cerca
-   - Acepta una solicitud
-   - Se crea un Viaje con estado "aceptado"
-
-3. **Viaje en progreso**
-   - Conductor va al origen (estado "en_camino_origen")
-   - Llega al origen (estado "llegado_origen")
-   - Inicia el viaje (estado "en_viaje")
-   - Completa el viaje (estado "completado")
-
-4. **Calificación**
-   - Pasajero y conductor se califican mutuamente
-   - Se actualiza la calificación promedio del conductor
-
-## 🔐 Autenticación
-
-La aplicación utiliza JWT (JSON Web Tokens) para autenticación:
-- Token de acceso (corto plazo)
-- Token de refresco (largo plazo)
-- Los tokens se almacenan en AsyncStorage
-
-## 📱 Pantallas Principales
-
-1. **Login/Register** - Autenticación de usuarios
-2. **Home** - Mapa con solicitudes disponibles y botón para solicitar viaje
-3. **Solicitar Viaje** - Selección de origen/destino y precio
-4. **Viaje Activo** - Seguimiento del viaje en curso
-5. **Mis Viajes** - Historial de viajes
-6. **Perfil** - Información del usuario
-
-## 🚧 Próximas Mejoras
-
-- [ ] Notificaciones push
-- [ ] Chat en tiempo real entre pasajero y conductor
-- [ ] Integración con pasarelas de pago
-- [ ] Geocodificación inversa para direcciones
-- [ ] Cálculo automático de distancia y precio sugerido
-- [ ] Sistema de referidos
-- [ ] Modo conductor/pasajero
-- [ ] Historial de pagos
-- [ ] Soporte multi-idioma
+Para contribuir al proyecto:
+1. Crea una rama nueva para tu feature
+2. Haz commit de tus cambios
+3. Crea un Pull Request
 
 ## 📄 Licencia
 
-Este proyecto es de código abierto y está disponible bajo la licencia MIT.
+[Especificar licencia del proyecto]
 
-## 👥 Contribuidores
+## 👥 Contacto
 
-- Equipo de desarrollo Tuky
-
----
-
-**Nota**: Esta aplicación está en desarrollo activo. Algunas funcionalidades pueden estar incompletas o en fase de prueba.
+[Información de contacto del equipo]

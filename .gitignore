@@ -83,6 +83,7 @@ Thumbs.db
 *.key
 .env
 .env.*
+!.env.example
 
 *.7z
 *.xlsx
@@ -90,3 +91,9 @@ Thumbs.db
 *.pdf
 *.drawio
 *.png
+
+# React Native / Mobile
+frontend/android/
+frontend/ios/
+frontend/temp_restore/
+backend/core-service-ms/frontend/

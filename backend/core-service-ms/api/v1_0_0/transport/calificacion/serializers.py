@@ -12,3 +12,5 @@ class CalificacionSerializer(HelperSerializerModel):
         read_only_fields = ['id', 'calificador', 'fecha_calificacion']
 
 
+
+

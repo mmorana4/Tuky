@@ -13,3 +13,5 @@ class SolicitudViajeSerializer(HelperSerializerModel):
         read_only_fields = ['id', 'pasajero', 'fecha_creacion']
 
 
+
+

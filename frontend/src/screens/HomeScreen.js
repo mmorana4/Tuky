@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,19 +6,58 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Platform,
+  PermissionsAndroid,
 } from 'react-native';
-import MapView, {Marker} from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
 import TransportService from '../services/transportService';
 
-export default function HomeScreen({navigation}) {
-  const [location, setLocation] = useState(null);
+export default function HomeScreen({ navigation }) {
+  const [location, setLocation] = useState({
+    latitude: -2.170998,
+    longitude: -79.922359,
+  });
   const [solicitudes, setSolicitudes] = useState([]);
 
   useEffect(() => {
-    obtenerUbicacion();
-    cargarSolicitudes();
+    requestLocationPermission();
   }, []);
+
+  const requestLocationPermission = async () => {
+    try {
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Permiso de Ubicación',
+            message: 'Tuky Motos necesita acceso a tu ubicación',
+            buttonNeutral: 'Preguntar Luego',
+            buttonNegative: 'Cancelar',
+            buttonPositive: 'OK',
+          },
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          obtenerUbicacion();
+        } else {
+          console.log('Permiso de ubicación denegado');
+          // Usar ubicación por defecto
+          setLocation({
+            latitude: -2.170998,
+            longitude: -79.922359,
+          });
+        }
+      } else {
+        obtenerUbicacion();
+      }
+    } catch (err) {
+      console.warn('Error al solicitar permiso:', err);
+      setLocation({
+        latitude: -2.170998,
+        longitude: -79.922359,
+      });
+    }
+  };
 
   const obtenerUbicacion = () => {
     Geolocation.getCurrentPosition(
@@ -29,22 +68,29 @@ export default function HomeScreen({navigation}) {
         });
       },
       error => {
-        Alert.alert('Error', 'No se pudo obtener la ubicación');
+        console.log('Error obteniendo ubicación:', error);
+        // Usar ubicación por defecto en lugar de mostrar alerta
+        setLocation({
+          latitude: -2.170998,
+          longitude: -79.922359,
+        });
       },
-      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
     );
   };
 
   const cargarSolicitudes = async () => {
-    if (!location) return;
+    try {
+      const result = await TransportService.listarSolicitudesDisponibles(
+        location.latitude,
+        location.longitude,
+      );
 
-    const result = await TransportService.listarSolicitudesDisponibles(
-      location.latitude,
-      location.longitude,
-    );
-
-    if (result.success) {
-      setSolicitudes(result.data.data?.solicitudes || []);
+      if (result.success) {
+        setSolicitudes(result.data.data?.solicitudes || []);
+      }
+    } catch (error) {
+      console.log('Error cargando solicitudes:', error);
     }
   };
 
@@ -53,8 +99,8 @@ export default function HomeScreen({navigation}) {
       <MapView
         style={styles.map}
         initialRegion={{
-          latitude: location?.latitude || -2.170998,
-          longitude: location?.longitude || -79.922359,
+          latitude: location.latitude,
+          longitude: location.longitude,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}

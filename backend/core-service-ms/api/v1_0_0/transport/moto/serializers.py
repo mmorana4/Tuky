@@ -13,3 +13,5 @@ class MotoSerializer(HelperSerializerModel):
         read_only_fields = ['id', 'conductor']
 
 
+
+

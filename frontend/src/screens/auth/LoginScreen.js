@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,13 +8,13 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import {useAuth} from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
-export default function LoginScreen({navigation}) {
+export default function LoginScreen({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const {login} = useAuth();
+  const { login } = useAuth();
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -39,6 +39,7 @@ export default function LoginScreen({navigation}) {
       <TextInput
         style={styles.input}
         placeholder="Usuario"
+        placeholderTextColor="#999"
         value={username}
         onChangeText={setUsername}
         autoCapitalize="none"
@@ -47,6 +48,7 @@ export default function LoginScreen({navigation}) {
       <TextInput
         style={styles.input}
         placeholder="Contraseña"
+        placeholderTextColor="#999"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -99,6 +101,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 15,
     fontSize: 16,
+    color: '#000',
   },
   button: {
     backgroundColor: '#FF6B35',
@@ -121,5 +124,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 });
+
+
 
 

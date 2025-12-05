@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+
+  core-service:
+    build:
+      context: ./backend/core-service-ms
+      dockerfile: ../../infrastructure/docker/django.Dockerfile
+    volumes:
+      - ./backend/core-service-ms:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=${CORE_DEBUG}
+      - SECRET_KEY=${CORE_SECRET_KEY}
+      - DB_ENGINE=django.db.backends.postgresql
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_HOST=${POSTGRES_HOST}
+      - DB_PORT=${POSTGRES_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - ALLOWED_HOSTS=*
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  business-service:
+    build:
+      context: ./backend/business-service-ms
+      dockerfile: ../../infrastructure/docker/django.Dockerfile
+    volumes:
+      - ./backend/business-service-ms:/app
+    ports:
+      - "8001:8000"
+    environment:
+      - DEBUG=${BUSINESS_DEBUG}
+      - SECRET_KEY=${BUSINESS_SECRET_KEY}
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_HOST=${POSTGRES_HOST}
+      - DB_PORT=${POSTGRES_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - CORE_SERVICE_URL=http://core-service:8000
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      core-service:
+        condition: service_started
+
+volumes:
+  postgres_data:
+
+

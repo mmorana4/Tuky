@@ -52,5 +52,46 @@ class CarreraService(MyBusiness):
         except Exception as e:
             o_bus.set_success(False)
             o_bus.set_message(f'ocurrio un error: {str(e)}')
-        return o_bus.to_dict()
+        return o_bus
+
+    def load(self, id):
+        from security.models import Carrera
+        from .serializers import CarreraSerializer
+        o_bus = HelperService()
+        try:
+            try:
+                carrera = Carrera.objects.get(pk=id)
+            except Carrera.DoesNotExist:
+                raise NameError(u"No se encontro carrera")
+            serialized_data = CarreraSerializer(carrera).data
+            o_bus.set_data({"carrera": serialized_data})
+            o_bus.set_success(True)
+        except Exception as ex:
+            o_bus.set_success(False)
+            o_bus.set_message(f"{ex.__str__()}")
+        return o_bus
+
+    def save(self, cleaned_data):
+        from security.models import Carrera
+        o_bus = HelperService()
+        try:
+            id = cleaned_data.get('id', 0)
+            try:
+                carrera = Carrera.objects.get(pk=id)
+                carrera.nombre = cleaned_data['nombre']
+                carrera.nombre_mostrar = cleaned_data['nombre_mostrar']
+                carrera.vigente = cleaned_data.get('vigente', True)
+            except Carrera.DoesNotExist:
+                carrera = Carrera(
+                    nombre=cleaned_data['nombre'],
+                    nombre_mostrar=cleaned_data['nombre_mostrar'],
+                    vigente=cleaned_data.get('vigente', True)
+                )
+            carrera.save(self.request)
+            o_bus.set_data({"id": carrera.id})
+            o_bus.set_success(True)
+        except Exception as ex:
+            o_bus.set_success(False)
+            o_bus.set_message(f"{ex.__str__()}")
+        return o_bus
 
