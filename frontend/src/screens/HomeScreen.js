@@ -12,17 +12,64 @@ import {
 import MapView, { Marker } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
 import TransportService from '../services/transportService';
+import { useAuth } from '../context/AuthContext';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function HomeScreen({ navigation }) {
   const [location, setLocation] = useState({
     latitude: -2.170998,
     longitude: -79.922359,
   });
+  const [region, setRegion] = useState({
+    latitude: -2.170998,
+    longitude: -79.922359,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  });
   const [solicitudes, setSolicitudes] = useState([]);
+  const [conductores, setConductores] = useState([]);
 
   useEffect(() => {
     requestLocationPermission();
   }, []);
+
+  useEffect(() => {
+    // Poll conductors/requests every 10s
+    const interval = setInterval(() => {
+      cargarDatosMapa();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [location, user]);
+
+  const cargarDatosMapa = async () => {
+    await cargarSolicitudes();
+    if (!user?.profile?.is_conductor) {
+      await cargarConductores();
+    }
+  };
+
+  const cargarConductores = async () => {
+    if (!location) return;
+    const result = await TransportService.listarConductoresDisponibles(
+      location.latitude,
+      location.longitude
+    );
+    if (result.success && result.data?.conductores) {
+      setConductores(result.data.conductores);
+    }
+  };
+
+  // Auto-center map when location changes
+  useEffect(() => {
+    if (location) {
+      setRegion({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+    }
+  }, [location]);
 
   const requestLocationPermission = async () => {
     try {
@@ -94,16 +141,13 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
+  const { user } = useAuth();
+
   return (
     <View style={styles.container}>
       <MapView
         style={styles.map}
-        initialRegion={{
-          latitude: location.latitude,
-          longitude: location.longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
+        region={region}
         showsUserLocation={true}>
         {solicitudes.map(solicitud => (
           <Marker
@@ -112,18 +156,40 @@ export default function HomeScreen({ navigation }) {
               latitude: parseFloat(solicitud.origen_lat),
               longitude: parseFloat(solicitud.origen_lng),
             }}
-            title={`Precio: $${solicitud.precio_solicitado}`}
-          />
+            title={`Solicitud: $${solicitud.precio_solicitado}`}
+          >
+            <View style={{ backgroundColor: 'white', padding: 5, borderRadius: 20, borderWidth: 2, borderColor: '#4CAF50' }}>
+              <Icon name="person" size={20} color="#4CAF50" />
+            </View>
+          </Marker>
+        ))}
+
+        {conductores.map(conductor => (
+          <Marker
+            key={`cond-${conductor.id}`}
+            coordinate={{
+              latitude: parseFloat(conductor.ubicacion_actual_lat),
+              longitude: parseFloat(conductor.ubicacion_actual_lng),
+            }}
+            title={`Conductor: ${conductor.user__first_name}`}
+            pinColor="blue"
+          >
+            <View style={{ backgroundColor: 'white', padding: 5, borderRadius: 20, borderWidth: 2, borderColor: '#2196F3' }}>
+              <Icon name="bicycle" size={20} color="#2196F3" />
+            </View>
+          </Marker>
         ))}
       </MapView>
 
-      <View style={styles.overlay}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('SolicitarViaje')}>
-          <Text style={styles.buttonText}>Solicitar Viaje</Text>
-        </TouchableOpacity>
-      </View>
+      {!user?.profile?.is_conductor && (
+        <View style={styles.overlay}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('SolicitarViaje')}>
+            <Text style={styles.buttonText}>Solicitar Viaje</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -142,7 +208,7 @@ const styles = StyleSheet.create({
     right: 20,
   },
   button: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#2196F3',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',

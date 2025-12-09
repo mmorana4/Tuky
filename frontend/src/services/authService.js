@@ -49,6 +49,25 @@ class AuthService {
     }
   }
 
+  async register(userData) {
+    try {
+      const response = await api.post(API_ENDPOINTS.AUTH.REGISTER, userData);
+      console.log('Register response:', response.data);
+
+      if (response.data.is_success) {
+        return { success: true, message: 'Usuario registrado exitosamente' };
+      } else {
+        return { success: false, error: response.data.message || 'Error al registrar' };
+      }
+    } catch (error) {
+      console.error('Register error:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Error al registrar usuario',
+      };
+    }
+  }
+
   async logout() {
     try {
       await api.post(API_ENDPOINTS.AUTH.LOGOUT);

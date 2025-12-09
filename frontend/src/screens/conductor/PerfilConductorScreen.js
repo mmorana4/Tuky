@@ -30,7 +30,7 @@ export default function PerfilConductorScreen({navigation}) {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#FF6B35" />
+        <ActivityIndicator size="large" color="#2196F3" />
       </View>
     );
   }
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 30,
-    color: '#FF6B35',
+    color: '#2196F3',
   },
   section: {
     marginBottom: 20,
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   button: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#2196F3',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -128,6 +128,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
 
 
 

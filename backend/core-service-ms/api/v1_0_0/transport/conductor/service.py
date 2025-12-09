@@ -5,6 +5,9 @@ from helpers.service_helper import HelperService
 
 class ConductorService(HelperService):
     
+    def __init__(self, *args, **kwargs):
+        super(ConductorService, self).__init__()
+    
     def registrar_conductor(self, data, usuario):
         """Registra un nuevo conductor"""
         try:
@@ -24,7 +27,16 @@ class ConductorService(HelperService):
         """Obtiene el perfil del conductor"""
         try:
             conductor = Conductor.objects.get(user=usuario)
-            return self.success_response({'conductor': conductor})
+            conductor_data = {
+                'id': conductor.id,
+                'licencia_numero': conductor.licencia_numero,
+                'telefono': conductor.telefono,
+                'calificacion_promedio': str(conductor.calificacion_promedio),
+                'total_viajes': conductor.total_viajes,
+                'estado': conductor.estado,
+                'documentos_verificados': conductor.documentos_verificados,
+            }
+            return self.success_response({'conductor': conductor_data})
         except Conductor.DoesNotExist:
             return self.error_response('El usuario no está registrado como conductor')
         except Exception as e:

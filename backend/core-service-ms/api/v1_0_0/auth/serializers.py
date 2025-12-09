@@ -12,9 +12,24 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    profile = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'type_document', 'document']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'type_document', 'document', 'profile']
+
+    def get_profile(self, obj):
+        try:
+            profile = obj.profiles.filter(is_current=True).first()
+            if profile:
+                return {
+                    'is_conductor': profile.is_conductor,
+                    'role': profile.role.name if profile.role else None,
+                    'branch': profile.branch.name if profile.branch else None
+                }
+        except Exception:
+            pass
+        return {'is_conductor': False}
 
 
 class SignInSerializer(serializers.Serializer):

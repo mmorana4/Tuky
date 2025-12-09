@@ -148,8 +148,11 @@ class ConductorController:
             self.response.set_data(resultado.get_data())
             
         except Exception as e:
+            import traceback
+            traceback.print_exc()
+            print(f"CRITICAL ERROR IN CONDUCTOR CONTROLLER: {e}")
             self.response.set_success(False)
-            self.response.set_message(str(e))
+            self.response.set_message(f"Error interno: {str(e)}")
             self.response.set_status(status.HTTP_400_BAD_REQUEST)
         
         return self.response.to_dict()

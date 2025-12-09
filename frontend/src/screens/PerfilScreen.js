@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 30,
-    color: '#FF6B35',
+    color: '#2196F3',
   },
   info: {
     marginBottom: 30,
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   button: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#2196F3',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -82,14 +82,15 @@ const styles = StyleSheet.create({
   buttonSecondary: {
     backgroundColor: '#fff',
     borderWidth: 2,
-    borderColor: '#FF6B35',
+    borderColor: '#2196F3',
   },
   buttonTextSecondary: {
-    color: '#FF6B35',
+    color: '#2196F3',
   },
   buttonDanger: {
     backgroundColor: '#f44336',
     marginTop: 20,
   },
 });
+
 

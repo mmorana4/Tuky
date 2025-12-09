@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,11 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import MapView, {Marker, Polyline} from 'react-native-maps';
+import MapView, { Marker, Polyline } from 'react-native-maps';
 import TransportService from '../services/transportService';
 
-export default function ViajeActivoScreen({route, navigation}) {
-  const {viajeId} = route.params;
+export default function ViajeActivoScreen({ route, navigation }) {
+  const { viajeId } = route.params;
   const [viaje, setViaje] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -24,7 +24,21 @@ export default function ViajeActivoScreen({route, navigation}) {
     setLoading(false);
 
     if (result.success) {
-      setViaje(result.data.data?.viaje);
+      setViaje(result.data.aData?.viaje);
+    }
+  };
+
+  const actualizarEstado = async (endpoint, mensaje) => {
+    try {
+      const response = await TransportService[endpoint](viajeId);
+      if (response.success) {
+        Alert.alert('Éxito', mensaje);
+        cargarViaje(); // Recargar para actualizar estado
+      } else {
+        Alert.alert('Error', response.error);
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -33,10 +47,7 @@ export default function ViajeActivoScreen({route, navigation}) {
       'Completar Viaje',
       'Ingresa el precio final (opcional)',
       [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
+        { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Completar',
           onPress: async precio => {
@@ -56,7 +67,7 @@ export default function ViajeActivoScreen({route, navigation}) {
   if (loading || !viaje) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#FF6B35" />
+        <ActivityIndicator size="large" color="#2196F3" />
       </View>
     );
   }
@@ -75,7 +86,7 @@ export default function ViajeActivoScreen({route, navigation}) {
         <Marker coordinate={viaje.destino} title="Destino" pinColor="red" />
         <Polyline
           coordinates={[viaje.origen, viaje.destino]}
-          strokeColor="#FF6B35"
+          strokeColor="#2196F3"
           strokeWidth={3}
         />
       </MapView>
@@ -86,9 +97,34 @@ export default function ViajeActivoScreen({route, navigation}) {
         <Text style={styles.label}>Origen: {viaje.origen.direccion}</Text>
         <Text style={styles.label}>Destino: {viaje.destino.direccion}</Text>
 
+        {/* Flujo de Estados */}
+        {viaje.estado === 'aceptada' && (
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: '#FF9800' }]}
+            onPress={() => actualizarEstado('enCaminoOrigen', 'Notificado: Vas en camino')}>
+            <Text style={styles.buttonText}>🚀 Voy en camino</Text>
+          </TouchableOpacity>
+        )}
+
+        {viaje.estado === 'en_camino_origen' && (
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: '#4CAF50' }]}
+            onPress={() => actualizarEstado('llegarOrigen', 'Notificado: Llegaste al origen')}>
+            <Text style={styles.buttonText}>📍 Ya llegué</Text>
+          </TouchableOpacity>
+        )}
+
+        {viaje.estado === 'llegado_origen' && (
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: '#2196F3' }]}
+            onPress={() => actualizarEstado('iniciarViaje', '¡Viaje iniciado!')}>
+            <Text style={styles.buttonText}>🏁 Iniciar Viaje</Text>
+          </TouchableOpacity>
+        )}
+
         {viaje.estado === 'en_viaje' && (
-          <TouchableOpacity style={styles.button} onPress={handleCompletar}>
-            <Text style={styles.buttonText}>Completar Viaje</Text>
+          <TouchableOpacity style={[styles.button, { backgroundColor: '#F44336' }]} onPress={handleCompletar}>
+            <Text style={styles.buttonText}>✅ Completar Viaje</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -114,7 +150,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#2196F3',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -131,6 +167,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
 
 
 

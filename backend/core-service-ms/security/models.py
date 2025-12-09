@@ -796,6 +796,10 @@ class Profile(MyModel):
         default=True,
         verbose_name='¿Vigente?'
     )
+    is_conductor = models.BooleanField(
+        default=False,
+        verbose_name='¿Es Conductor?'
+    )
 
     class Meta:
         verbose_name = u"Perfil"

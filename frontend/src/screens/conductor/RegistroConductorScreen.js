@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,10 +10,10 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import ConductorService from '../../services/conductorService';
-import {useAuth} from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
-export default function RegistroConductorScreen({navigation}) {
-  const {user} = useAuth();
+export default function RegistroConductorScreen({ navigation }) {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     telefono: '',
     licencia_numero: '',
@@ -33,7 +33,7 @@ export default function RegistroConductorScreen({navigation}) {
 
     if (result.success) {
       Alert.alert('Éxito', 'Conductor registrado correctamente', [
-        {text: 'OK', onPress: () => navigation.goBack()},
+        { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } else {
       Alert.alert('Error', result.error);
@@ -48,8 +48,9 @@ export default function RegistroConductorScreen({navigation}) {
       <TextInput
         style={styles.input}
         placeholder="Ej: 0999999999"
+        placeholderTextColor="#999"
         value={formData.telefono}
-        onChangeText={text => setFormData({...formData, telefono: text})}
+        onChangeText={text => setFormData({ ...formData, telefono: text })}
         keyboardType="phone-pad"
       />
 
@@ -57,16 +58,18 @@ export default function RegistroConductorScreen({navigation}) {
       <TextInput
         style={styles.input}
         placeholder="Número de licencia"
+        placeholderTextColor="#999"
         value={formData.licencia_numero}
-        onChangeText={text => setFormData({...formData, licencia_numero: text})}
+        onChangeText={text => setFormData({ ...formData, licencia_numero: text })}
       />
 
       <Text style={styles.label}>Vencimiento de Licencia</Text>
       <TextInput
         style={styles.input}
         placeholder="YYYY-MM-DD"
+        placeholderTextColor="#999"
         value={formData.licencia_vencimiento}
-        onChangeText={text => setFormData({...formData, licencia_vencimiento: text})}
+        onChangeText={text => setFormData({ ...formData, licencia_vencimiento: text })}
       />
 
       <TouchableOpacity
@@ -94,7 +97,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 20,
     marginBottom: 30,
-    color: '#FF6B35',
+    color: '#2196F3',
   },
   label: {
     fontSize: 16,
@@ -108,9 +111,10 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 20,
     fontSize: 16,
+    color: '#000',
   },
   button: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#2196F3',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -122,6 +126,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
 
 
 

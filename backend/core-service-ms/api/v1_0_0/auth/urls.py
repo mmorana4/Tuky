@@ -1,10 +1,11 @@
 from django.urls import re_path, include
-from .views import SignInView, SignOutView, TokenRefreshView, GoogleOAuthView, GoogleOAuthCallbackView
+from .views import SignInView, SignOutView, TokenRefreshView, GoogleOAuthView, GoogleOAuthCallbackView, RegisterView
 
 urlpatterns = [
     # Autenticación tradicional
     re_path(r'^sign-in$', SignInView.as_view(), name="api_v1_0_0_view_auth_sign_in"),
     re_path(r'^sign-out$', SignOutView.as_view(), name="api_v1_0_0_view_auth_sign_out"),
+    re_path(r'^register/$', RegisterView.as_view(), name="api_v1_0_0_view_auth_register"),
     re_path(r'^refresh$', TokenRefreshView.as_view(), name="api_v1_0_0_view_auth_refresh"),
 
     # OAuth2 Google

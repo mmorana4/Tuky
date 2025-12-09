@@ -24,6 +24,12 @@ class SolicitudViajeView(ViewSet):
         controller = SolicitudViajeController(request=request)
         return controller.aceptar()
     
+    @action(methods=['get'], detail=True, url_path='estado')
+    def estado(self, request, pk=None):
+        from .controller import SolicitudViajeController
+        controller = SolicitudViajeController(request=request)
+        return controller.obtener_estado(pk)
+    
     @action(methods=['post'], detail=False)
     def cancelar(self, request):
         from .controller import SolicitudViajeController

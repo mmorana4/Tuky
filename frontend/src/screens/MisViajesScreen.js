@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import TransportService from '../services/transportService';
 
-export default function MisViajesScreen({navigation}) {
+export default function MisViajesScreen({ navigation }) {
   const [viajes, setViajes] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -23,14 +23,14 @@ export default function MisViajesScreen({navigation}) {
     setLoading(false);
 
     if (result.success) {
-      setViajes(result.data.data?.viajes || []);
+      setViajes(result.data.aData?.viajes || []);
     }
   };
 
-  const renderViaje = ({item}) => (
+  const renderViaje = ({ item }) => (
     <TouchableOpacity
       style={styles.viajeCard}
-      onPress={() => navigation.navigate('ViajeActivo', {viajeId: item.id})}>
+      onPress={() => navigation.navigate('ViajeActivo', { viajeId: item.id })}>
       <Text style={styles.estado}>{item.estado}</Text>
       <Text style={styles.ruta}>{item.origen} → {item.destino}</Text>
       <Text style={styles.precio}>${item.precio}</Text>
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#FF6B35',
+    color: '#2196F3',
   },
   viajeCard: {
     backgroundColor: '#f5f5f5',
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
   estado: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#FF6B35',
+    color: '#2196F3',
     marginBottom: 5,
   },
   ruta: {
@@ -105,6 +105,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
 });
+
 
 
 

@@ -137,10 +137,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FF6B35',
+    color: '#2196F3',
   },
   btnAgregar: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#2196F3',
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 8,
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#2196F3',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -230,6 +230,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
+
 
 
 

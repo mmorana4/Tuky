@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import AuthService from '../services/authService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const AuthContext = createContext({});
 
@@ -13,10 +14,16 @@ export const AuthProvider = ({ children }) => {
 
   const loadUser = async () => {
     try {
+      console.log('🔄 AuthContext: Loading user...');
       const userData = await AuthService.getCurrentUser();
+      console.log('👤 AuthContext: User loaded:', userData ? userData.username : 'No user');
+
+      const token = await AsyncStorage.getItem('auth_token');
+      console.log('🔑 AuthContext: Token exists:', !!token);
+
       setUser(userData);
     } catch (error) {
-      console.error('Error al cargar usuario:', error);
+      console.error('❌ AuthContext: Error loading user:', error);
     } finally {
       setLoading(false);
     }

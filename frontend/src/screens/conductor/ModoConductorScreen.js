@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,12 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
-import MapView, {Marker} from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
 import ConductorService from '../../services/conductorService';
 import TransportService from '../../services/transportService';
 
-export default function ModoConductorScreen({navigation}) {
+export default function ModoConductorScreen({ navigation }) {
   const [location, setLocation] = useState(null);
   const [solicitudes, setSolicitudes] = useState([]);
   const [estado, setEstado] = useState('no_disponible');
@@ -43,23 +43,28 @@ export default function ModoConductorScreen({navigation}) {
   };
 
   const cargarEstado = async () => {
+    console.log('🔄 ModoConductor: Cargando perfil...');
     const result = await ConductorService.obtenerPerfil();
+    console.log('👤 ModoConductor: Perfil result:', result);
     if (result.success && result.data.data?.conductor) {
       setEstado(result.data.data.conductor.estado);
     }
   };
 
   const cargarSolicitudes = async () => {
-    if (!location) return;
+    // if (!location) return; // Allow test without location
     setLoading(true);
+    console.log('📡 ModoConductor: Buscando solicitudes...');
     const result = await TransportService.listarSolicitudesDisponibles(
-      location.latitude,
-      location.longitude,
+      location?.latitude || null,
+      location?.longitude || null,
     );
     setLoading(false);
 
+    console.log('📦 ModoConductor: Solicitudes result:', result.success, result.data?.aData?.solicitudes?.length);
+
     if (result.success) {
-      setSolicitudes(result.data.data?.solicitudes || []);
+      setSolicitudes(result.data.aData?.solicitudes || []);
     }
   };
 
@@ -78,7 +83,7 @@ export default function ModoConductorScreen({navigation}) {
       'Aceptar Solicitud',
       '¿Deseas aceptar esta solicitud de viaje?',
       [
-        {text: 'Cancelar', style: 'cancel'},
+        { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Aceptar',
           onPress: async () => {
@@ -89,7 +94,7 @@ export default function ModoConductorScreen({navigation}) {
                   text: 'OK',
                   onPress: () =>
                     navigation.navigate('ViajeActivo', {
-                      viajeId: result.data.data.viaje_id,
+                      viajeId: result.data.aData?.viaje_id,
                     }),
                 },
               ]);
@@ -147,6 +152,11 @@ export default function ModoConductorScreen({navigation}) {
               <Text style={styles.botonEstadoText}>No Disponible</Text>
             </TouchableOpacity>
           </View>
+          <TouchableOpacity
+            style={styles.verSolicitudesButton}
+            onPress={() => navigation.navigate('SolicitudesDisponibles')}>
+            <Text style={styles.verSolicitudesText}>📋 Ver Solicitudes</Text>
+          </TouchableOpacity>
         </View>
 
         <ScrollView
@@ -192,7 +202,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: '50%',
+    maxHeight: '60%',
+    paddingBottom: 60, // Add padding for tab bar
   },
   estadoContainer: {
     padding: 15,
@@ -217,7 +228,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   botonEstadoActivo: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#2196F3',
   },
   botonEstadoText: {
     color: '#000',
@@ -252,7 +263,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
+  verSolicitudesButton: {
+    backgroundColor: '#2196F3',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  verSolicitudesText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
+
 
 
 

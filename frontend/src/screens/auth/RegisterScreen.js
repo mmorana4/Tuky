@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,9 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
+import authService from '../../services/authService';
 
-export default function RegisterScreen({navigation}) {
+export default function RegisterScreen({ navigation }) {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -18,9 +19,29 @@ export default function RegisterScreen({navigation}) {
     last_name: '',
   });
 
-  const handleRegister = () => {
-    // TODO: Implementar registro
-    Alert.alert('Info', 'Funcionalidad de registro en desarrollo');
+  const handleRegister = async () => {
+    // Validar campos
+    if (!formData.username || !formData.password || !formData.email || !formData.first_name || !formData.last_name) {
+      Alert.alert('Error', 'Todos los campos son requeridos');
+      return;
+    }
+
+    try {
+      const result = await authService.register(formData);
+
+      if (result.success) {
+        Alert.alert('Éxito', 'Usuario registrado correctamente', [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('Login'),
+          },
+        ]);
+      } else {
+        Alert.alert('Error', result.error || 'No se pudo registrar');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Error al registrar usuario');
+    }
   };
 
   return (
@@ -30,30 +51,34 @@ export default function RegisterScreen({navigation}) {
       <TextInput
         style={styles.input}
         placeholder="Nombres"
+        placeholderTextColor="#999"
         value={formData.first_name}
-        onChangeText={text => setFormData({...formData, first_name: text})}
+        onChangeText={text => setFormData({ ...formData, first_name: text })}
       />
 
       <TextInput
         style={styles.input}
         placeholder="Apellidos"
+        placeholderTextColor="#999"
         value={formData.last_name}
-        onChangeText={text => setFormData({...formData, last_name: text})}
+        onChangeText={text => setFormData({ ...formData, last_name: text })}
       />
 
       <TextInput
         style={styles.input}
         placeholder="Usuario"
+        placeholderTextColor="#999"
         value={formData.username}
-        onChangeText={text => setFormData({...formData, username: text})}
+        onChangeText={text => setFormData({ ...formData, username: text })}
         autoCapitalize="none"
       />
 
       <TextInput
         style={styles.input}
         placeholder="Email"
+        placeholderTextColor="#999"
         value={formData.email}
-        onChangeText={text => setFormData({...formData, email: text})}
+        onChangeText={text => setFormData({ ...formData, email: text })}
         keyboardType="email-address"
         autoCapitalize="none"
       />
@@ -61,8 +86,9 @@ export default function RegisterScreen({navigation}) {
       <TextInput
         style={styles.input}
         placeholder="Contraseña"
+        placeholderTextColor="#999"
         value={formData.password}
-        onChangeText={text => setFormData({...formData, password: text})}
+        onChangeText={text => setFormData({ ...formData, password: text })}
         secureTextEntry
       />
 
@@ -91,7 +117,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 40,
     marginBottom: 30,
-    color: '#FF6B35',
+    color: '#2196F3',
   },
   input: {
     borderWidth: 1,
@@ -100,9 +126,10 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 15,
     fontSize: 16,
+    color: '#000',
   },
   button: {
-    backgroundColor: '#FF6B35',
+    backgroundColor: '#2196F3',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -118,10 +145,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   linkText: {
-    color: '#FF6B35',
+    color: '#2196F3',
     fontSize: 14,
   },
 });
+
 
 
 
