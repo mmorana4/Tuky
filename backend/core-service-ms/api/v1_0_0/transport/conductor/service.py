@@ -1,6 +1,7 @@
 from django.utils import timezone
 from security.models import Conductor, User
 from helpers.service_helper import HelperService
+from math import radians, sin, cos, asin, sqrt
 
 
 class ConductorService(HelperService):
@@ -101,22 +102,79 @@ class ConductorService(HelperService):
     
     def listar_conductores_disponibles(self, lat=None, lng=None, radio_km=5):
         """Lista conductores disponibles cerca de una ubicación"""
+        
+        def haversine(lat1, lon1, lat2, lon2):
+            """Calcula distancia en km entre dos puntos usando Haversine"""
+            R = 6371  # Radio de la Tierra en km
+            lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+            dlat = lat2 - lat1
+            dlon = lon2 - lon1
+            a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+            c = 2 * asin(sqrt(a))
+            return R * c
+        
         try:
+            # Solo retornar conductores que estén disponibles
+            # No mostrar conductores en estado 'no_disponible' o 'en_viaje'
             conductores = Conductor.objects.filter(
-                estado='disponible',
+                estado='disponible',  # Solo conductores disponibles
                 documentos_verificados=True,
-                es_verificado=True
+                es_verificado=True,
+                ubicacion_actual_lat__isnull=False,
+                ubicacion_actual_lng__isnull=False
             )
             
-            # TODO: Filtrar por distancia usando lat/lng y radio_km
-            # Por ahora retornamos todos los disponibles
+            # Log para verificar el filtro
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"🔍 Conductores disponibles encontrados: {conductores.count()}")
+            
+            conductores_cercanos = []
+            
+            if lat and lng:
+                try:
+                    lat = float(lat)
+                    lng = float(lng)
+                    radio_km = float(radio_km)
+                    
+                    for conductor in conductores:
+                        if conductor.ubicacion_actual_lat and conductor.ubicacion_actual_lng:
+                            distancia = haversine(
+                                lat, lng,
+                                float(conductor.ubicacion_actual_lat),
+                                float(conductor.ubicacion_actual_lng)
+                            )
+                            if distancia <= radio_km:
+                                conductores_cercanos.append({
+                                    'id': conductor.id,
+                                    'user__first_name': conductor.user.first_name,
+                                    'user__last_name': conductor.user.last_name,
+                                    'calificacion_promedio': str(conductor.calificacion_promedio),
+                                    'total_viajes': conductor.total_viajes,
+                                    'ubicacion_actual_lat': float(conductor.ubicacion_actual_lat),
+                                    'ubicacion_actual_lng': float(conductor.ubicacion_actual_lng),
+                                    'distancia_km': round(distancia, 2)
+                                })
+                except (ValueError, TypeError) as e:
+                    return self.error_response(f'Error en coordenadas: {str(e)}')
+            else:
+                # Si no se proporcionan coordenadas, retornar todos los disponibles
+                conductores_cercanos = [
+                    {
+                        'id': c.id,
+                        'user__first_name': c.user.first_name,
+                        'user__last_name': c.user.last_name,
+                        'calificacion_promedio': str(c.calificacion_promedio),
+                        'total_viajes': c.total_viajes,
+                        'ubicacion_actual_lat': float(c.ubicacion_actual_lat) if c.ubicacion_actual_lat else None,
+                        'ubicacion_actual_lng': float(c.ubicacion_actual_lng) if c.ubicacion_actual_lng else None,
+                    }
+                    for c in conductores
+                ]
             
             return self.success_response({
-                'conductores': list(conductores.values(
-                    'id', 'user__first_name', 'user__last_name',
-                    'calificacion_promedio', 'total_viajes',
-                    'ubicacion_actual_lat', 'ubicacion_actual_lng'
-                ))
+                'conductores': conductores_cercanos,
+                'total': len(conductores_cercanos)
             })
         except Exception as e:
             return self.error_response(str(e))

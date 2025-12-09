@@ -1,6 +1,7 @@
 from helpers.response_helper import HelperResponse
 from rest_framework import status
 from django.db import transaction
+from django.core.exceptions import ValidationError
 
 
 class ConductorController:
@@ -20,14 +21,14 @@ class ConductorController:
                 form = ConductorForm(data=data)
                 
                 if not form.is_valid():
-                    raise NameError("Debe ingresar la información en todos los campos.")
+                    raise ValidationError("Debe ingresar la información en todos los campos.")
                 
                 cleaned_data = form.cleaned_data
                 service = ConductorService(request=self.request)
                 resultado = service.registrar_conductor(cleaned_data, self.request.user)
                 
                 if not resultado.is_success:
-                    raise NameError(resultado.message)
+                    raise ValidationError(resultado.message)
                 
                 self.response.set_success(True)
                 self.response.set_status(status.HTTP_201_CREATED)
@@ -82,7 +83,7 @@ class ConductorController:
                 resultado = service.actualizar_perfil(cleaned_data, self.request.user)
                 
                 if not resultado.is_success:
-                    raise NameError(resultado.message)
+                    raise ValidationError(resultado.message)
                 
                 self.response.set_success(True)
                 self.response.set_status(status.HTTP_200_OK)
@@ -106,7 +107,7 @@ class ConductorController:
             lng = self.request.data.get('lng')
             
             if not lat or not lng:
-                raise NameError('Debe proporcionar latitud y longitud')
+                raise ValidationError('Debe proporcionar latitud y longitud')
             
             service = ConductorService(request=self.request)
             resultado = service.actualizar_ubicacion(float(lat), float(lng), self.request.user)
@@ -134,7 +135,7 @@ class ConductorController:
             nuevo_estado = self.request.data.get('estado')
             
             if not nuevo_estado:
-                raise NameError('Debe proporcionar el nuevo estado')
+                raise ValidationError('Debe proporcionar el nuevo estado')
             
             service = ConductorService(request=self.request)
             resultado = service.cambiar_estado(nuevo_estado, self.request.user)

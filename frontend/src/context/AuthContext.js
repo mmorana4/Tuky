@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import AuthService from '../services/authService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import EventBus from '../utils/eventBus';
 
 export const AuthContext = createContext({});
 
@@ -10,20 +11,37 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     loadUser();
+
+    // Escuchar evento de logout forzado (401)
+    const unsubscribe = EventBus.on('auth:logout', () => {
+      console.log('🚪 AuthContext: Forced logout triggered');
+      setUser(null);
+      setLoading(false);
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const loadUser = async () => {
     try {
       console.log('🔄 AuthContext: Loading user...');
-      const userData = await AuthService.getCurrentUser();
-      console.log('👤 AuthContext: User loaded:', userData ? userData.username : 'No user');
-
       const token = await AsyncStorage.getItem('auth_token');
       console.log('🔑 AuthContext: Token exists:', !!token);
 
+      if (!token) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      const userData = await AuthService.getCurrentUser();
+      console.log('👤 AuthContext: User loaded:', userData ? userData.username : 'No user');
       setUser(userData);
     } catch (error) {
       console.error('❌ AuthContext: Error loading user:', error);
+      setUser(null);
     } finally {
       setLoading(false);
     }

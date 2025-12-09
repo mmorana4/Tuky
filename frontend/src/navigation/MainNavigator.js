@@ -27,60 +27,65 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 function HomeStack() {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="HomeMain"
-        component={HomeScreen}
-        options={{ title: 'Inicio' }}
-      />
-      <Stack.Screen
-        name="SolicitarViaje"
-        component={SolicitarViajeScreen}
-        options={{ title: 'Solicitar Viaje' }}
-      />
-      <Stack.Screen
-        name="SolicitudEspera"
-        component={SolicitudEsperaScreen}
-        options={{ title: 'Buscando Conductor', headerLeft: () => null }}
-      />
-      <Stack.Screen
-        name="ViajeActivo"
-        component={ViajeActivoScreen}
-        options={{ title: 'Viaje en Curso' }}
-      />
-      <Stack.Screen
-        name="Calificar"
-        component={CalificarScreen}
-        options={{ title: 'Calificar' }}
-      />
-    </Stack.Navigator>
-  );
-}
+  const { user } = useAuth();
+  const isConductor = user?.profile?.is_conductor || false;
 
-function ConductorStack() {
   return (
     <Stack.Navigator>
-      <Stack.Screen
-        name="ModoConductorMain"
-        component={ModoConductorScreen}
-        options={{ title: 'Modo Conductor' }}
-      />
-      <Stack.Screen
-        name="SolicitudesDisponibles"
-        component={SolicitudesDisponiblesScreen}
-        options={{ title: 'Solicitudes Disponibles' }}
-      />
-      <Stack.Screen
-        name="ViajeActivo"
-        component={ViajeActivoScreen}
-        options={{ title: 'Viaje en Curso' }}
-      />
-      <Stack.Screen
-        name="Calificar"
-        component={CalificarScreen}
-        options={{ title: 'Calificar' }}
-      />
+      {isConductor ? (
+        // Si es conductor, mostrar ModoConductorScreen como home
+        <>
+          <Stack.Screen
+            name="HomeMain"
+            component={ModoConductorScreen}
+            options={{ title: 'Modo Conductor', headerShown: false }}
+          />
+          <Stack.Screen
+            name="SolicitudesDisponibles"
+            component={SolicitudesDisponiblesScreen}
+            options={{ title: 'Solicitudes Disponibles' }}
+          />
+          <Stack.Screen
+            name="ViajeActivo"
+            component={ViajeActivoScreen}
+            options={{ title: 'Viaje en Curso' }}
+          />
+          <Stack.Screen
+            name="Calificar"
+            component={CalificarScreen}
+            options={{ title: 'Calificar' }}
+          />
+        </>
+      ) : (
+        // Si es pasajero, mostrar HomeScreen normal
+        <>
+          <Stack.Screen
+            name="HomeMain"
+            component={HomeScreen}
+            options={{ title: 'Inicio' }}
+          />
+          <Stack.Screen
+            name="SolicitarViaje"
+            component={SolicitarViajeScreen}
+            options={{ title: 'Solicitar Viaje' }}
+          />
+          <Stack.Screen
+            name="SolicitudEspera"
+            component={SolicitudEsperaScreen}
+            options={{ title: 'Buscando Conductor', headerLeft: () => null }}
+          />
+          <Stack.Screen
+            name="ViajeActivo"
+            component={ViajeActivoScreen}
+            options={{ title: 'Viaje en Curso' }}
+          />
+          <Stack.Screen
+            name="Calificar"
+            component={CalificarScreen}
+            options={{ title: 'Calificar' }}
+          />
+        </>
+      )}
     </Stack.Navigator>
   );
 }
@@ -129,25 +134,19 @@ export default function MainNavigator() {
         tabBarInactiveTintColor: 'gray',
         headerShown: false,
       })}>
-      <Tab.Screen name="Home" component={HomeStack} />
+      <Tab.Screen 
+        name="Home" 
+        component={HomeStack}
+        options={{
+          title: isConductor ? 'Modo Conductor' : 'Inicio',
+        }}
+      />
       <Tab.Screen name="MisViajes" component={MisViajesScreen} />
       {isConductor && <Tab.Screen name="Motos" component={MotoStack} />}
       <Tab.Screen
         name="Perfil"
         component={isConductor ? PerfilConductorScreen : PerfilPasajeroScreen}
       />
-      {isConductor && (
-        <Tab.Screen
-          name="ModoConductor"
-          component={ConductorStack}
-          options={{
-            title: 'Modo Conductor',
-            tabBarIcon: ({ color, size }) => (
-              <Icon name="steering" size={size} color={color} />
-            ),
-          }}
-        />
-      )}
       <Tab.Screen
         name="PerfilConductor"
         component={PerfilConductorScreen}

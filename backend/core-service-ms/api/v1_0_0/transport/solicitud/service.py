@@ -16,7 +16,7 @@ class SolicitudViajeService(HelperService):
             
             solicitud = SolicitudViaje.objects.create(
                 pasajero=usuario,
-                estado='solicitado',
+                estado='pendiente',
                 **data
             )
             self.set_success(True)
@@ -42,26 +42,58 @@ class SolicitudViajeService(HelperService):
             return R * c
         
         try:
+            import logging
+            logger = logging.getLogger(__name__)
+            
+            # Obtener todas las solicitudes pendientes y no expiradas
             solicitudes = SolicitudViaje.objects.filter(
-                estado='solicitado',
+                estado='pendiente',
                 fecha_expiracion__gt=timezone.now()
             )
             
+            logger.info(f"📋 Solicitudes encontradas (pendientes, no expiradas): {solicitudes.count()}")
+            
             solicitudes_cercanas = []
             
-            if lat and lng:
-                lat = float(lat)
-                lng = float(lng)
-                
-                for solicitud in solicitudes:
-                    distancia = haversine(
-                        lat, lng,
-                        float(solicitud.origen_lat),
-                        float(solicitud.origen_lng)
-                    )
+            # Validar y convertir coordenadas
+            try:
+                if lat is not None and lng is not None and str(lat).lower() != 'null' and str(lng).lower() != 'null':
+                    lat = float(lat)
+                    lng = float(lng)
+                    radio_km = float(radio_km) if radio_km else 10.0
                     
-                    if distancia <= radio_km:
-                        sol_dict = {
+                    logger.info(f"📍 Filtrando por ubicación: lat={lat}, lng={lng}, radio={radio_km}km")
+                    
+                    for solicitud in solicitudes:
+                        try:
+                            distancia = haversine(
+                                lat, lng,
+                                float(solicitud.origen_lat),
+                                float(solicitud.origen_lng)
+                            )
+                            
+                            if distancia <= radio_km:
+                                sol_dict = {
+                                    'id': solicitud.id,
+                                    'origen_lat': str(solicitud.origen_lat),
+                                    'origen_lng': str(solicitud.origen_lng),
+                                    'origen_direccion': solicitud.origen_direccion,
+                                    'destino_lat': str(solicitud.destino_lat),
+                                    'destino_lng': str(solicitud.destino_lng),
+                                    'destino_direccion': solicitud.destino_direccion,
+                                    'precio_solicitado': str(solicitud.precio_solicitado),
+                                    'metodo_pago': solicitud.metodo_pago,
+                                    'distancia': round(distancia, 2),
+                                }
+                                solicitudes_cercanas.append(sol_dict)
+                        except (ValueError, TypeError) as e:
+                            logger.warning(f"Error calculando distancia para solicitud {solicitud.id}: {e}")
+                            continue
+                else:
+                    # Si no hay ubicación válida, retornar todas las solicitudes pendientes
+                    logger.info("📍 Sin ubicación válida, retornando todas las solicitudes pendientes")
+                    for solicitud in solicitudes:
+                        solicitudes_cercanas.append({
                             'id': solicitud.id,
                             'origen_lat': str(solicitud.origen_lat),
                             'origen_lng': str(solicitud.origen_lng),
@@ -71,11 +103,11 @@ class SolicitudViajeService(HelperService):
                             'destino_direccion': solicitud.destino_direccion,
                             'precio_solicitado': str(solicitud.precio_solicitado),
                             'metodo_pago': solicitud.metodo_pago,
-                            'distancia': round(distancia, 2),
-                        }
-                        solicitudes_cercanas.append(sol_dict)
-            else:
-                # Si no hay ubicación, retornar todas
+                            'distancia': 0,
+                        })
+            except (ValueError, TypeError) as e:
+                logger.error(f"Error procesando coordenadas: {e}")
+                # En caso de error, retornar todas las solicitudes
                 for solicitud in solicitudes:
                     solicitudes_cercanas.append({
                         'id': solicitud.id,
@@ -90,10 +122,15 @@ class SolicitudViajeService(HelperService):
                         'distancia': 0,
                     })
             
+            logger.info(f"✅ Solicitudes a retornar: {len(solicitudes_cercanas)}")
+            
             self.set_success(True)
             self.set_data({'solicitudes': solicitudes_cercanas})
             return self
         except Exception as e:
+            import traceback
+            logger.error(f"❌ Error en listar_solicitudes_disponibles: {e}")
+            logger.error(traceback.format_exc())
             self.set_success(False)
             self.set_message(str(e))
             return self
@@ -101,7 +138,7 @@ class SolicitudViajeService(HelperService):
     def aceptar_solicitud(self, solicitud_id, conductor, moto_id=None):
         """Un conductor acepta una solicitud de viaje"""
         try:
-            solicitud = SolicitudViaje.objects.get(id=solicitud_id, estado='solicitado')
+            solicitud = SolicitudViaje.objects.get(id=solicitud_id, estado='pendiente')
             
             # Crear el viaje
             viaje = Viaje.objects.create(
@@ -128,6 +165,10 @@ class SolicitudViajeService(HelperService):
             # Actualizar estado de la solicitud
             solicitud.estado = 'aceptada'
             solicitud.save()
+            
+            # Actualizar estado del conductor a no disponible
+            conductor.estado = 'en_viaje'
+            conductor.save()
             
             self.set_success(True)
             self.set_message('Solicitud aceptada')

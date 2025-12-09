@@ -15,6 +15,7 @@ export default function SolicitudEsperaScreen({ route, navigation }) {
     const [estado, setEstado] = useState('pendiente');
     const [conductor, setConductor] = useState(null);
     const [etaMinutos, setEtaMinutos] = useState(null);
+    const [viajeId, setViajeId] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -31,18 +32,31 @@ export default function SolicitudEsperaScreen({ route, navigation }) {
     const checkEstado = async () => {
         try {
             const result = await TransportService.obtenerEstadoSolicitud(solicitudId);
-            console.log('Estado solicitud:', result);
+            console.log('Estado solicitud:', JSON.stringify(result, null, 2));
 
             if (result.success && result.data) {
-                setEstado(result.data.estado);
+                // El backend retorna {is_success: true, aData: {estado, id, ...}}
+                const estadoData = result.data.aData || result.data;
+                const estadoActual = estadoData.estado || estadoData.estado;
+
+                console.log('Estado actual:', estadoActual);
+                setEstado(estadoActual);
                 setLoading(false);
 
-                if (result.data.estado === 'aceptada') {
-                    setConductor(result.data.conductor);
-                    setEtaMinutos(result.data.eta_minutos);
-                } else if (result.data.estado === 'expirada' || result.data.estado === 'cancelada') {
+                if (estadoActual === 'aceptada') {
+                    setConductor(estadoData.conductor);
+                    setEtaMinutos(estadoData.eta_minutos);
+                    
+                    // Guardar viaje_id para navegación
+                    if (estadoData.viaje_id) {
+                        setViajeId(estadoData.viaje_id);
+                    }
+                } else if (estadoActual === 'cancelada') {
+                    // Si se canceló (por usuario o sistema), volver al home sin alerta bloqueante
+                    navigation.navigate('Home');
+                } else if (estadoActual === 'expirada') {
                     Alert.alert(
-                        'Solicitud ' + result.data.estado,
+                        'Solicitud Expirada',
                         'Tu solicitud no pudo ser completada',
                         [{ text: 'OK', onPress: () => navigation.navigate('Home') }]
                     );
@@ -116,15 +130,31 @@ export default function SolicitudEsperaScreen({ route, navigation }) {
                     </View>
                 )}
 
-                <TouchableOpacity
-                    style={styles.mapButton}
-                    onPress={() => Alert.alert('Próximamente', 'Seguimiento en mapa')}>
-                    <Icon name="map-outline" size={24} color="#fff" />
-                    <Text style={styles.mapButtonText}>Ver en Mapa</Text>
-                </TouchableOpacity>
+                {viajeId ? (
+                    <TouchableOpacity
+                        style={styles.mapButton}
+                        onPress={() => {
+                            navigation.replace('ViajeActivo', {
+                                viajeId: viajeId,
+                            });
+                        }}>
+                        <Icon name="map-outline" size={24} color="#fff" />
+                        <Text style={styles.mapButtonText}>Ver Viaje en Mapa</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity
+                        style={styles.mapButton}
+                        onPress={() => Alert.alert('Esperando', 'El viaje se está configurando...')}>
+                        <Icon name="map-outline" size={24} color="#fff" />
+                        <Text style={styles.mapButtonText}>Ver en Mapa</Text>
+                    </TouchableOpacity>
+                )}
             </View>
         );
     }
+
+    // Mostrar botón de cancelar solo si está pendiente y no está cargando
+    const mostrarCancelar = estado === 'pendiente' && !loading;
 
     return (
         <View style={styles.container}>
@@ -141,9 +171,12 @@ export default function SolicitudEsperaScreen({ route, navigation }) {
                 </Text>
             </View>
 
-            <TouchableOpacity style={styles.cancelButton} onPress={handleCancelar}>
-                <Text style={styles.cancelButtonText}>Cancelar Solicitud</Text>
-            </TouchableOpacity>
+            {mostrarCancelar && (
+                <TouchableOpacity style={styles.cancelButton} onPress={handleCancelar}>
+                    <Icon name="close-circle" size={24} color="#fff" />
+                    <Text style={styles.cancelButtonText}>Cancelar Solicitud</Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 }
@@ -184,6 +217,8 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     cancelButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
         backgroundColor: '#f44336',
         paddingHorizontal: 30,
         paddingVertical: 12,

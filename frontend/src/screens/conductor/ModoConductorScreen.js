@@ -15,6 +15,12 @@ import TransportService from '../../services/transportService';
 
 export default function ModoConductorScreen({ navigation }) {
   const [location, setLocation] = useState(null);
+  const [region, setRegion] = useState({
+    latitude: -2.170998,
+    longitude: -79.922359,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  });
   const [solicitudes, setSolicitudes] = useState([]);
   const [estado, setEstado] = useState('no_disponible');
   const [loading, setLoading] = useState(false);
@@ -22,8 +28,36 @@ export default function ModoConductorScreen({ navigation }) {
   useEffect(() => {
     obtenerUbicacion();
     cargarEstado();
-    cargarSolicitudes();
   }, []);
+
+  useEffect(() => {
+    // Cargar solicitudes cuando cambia la ubicación
+    if (location) {
+      cargarSolicitudes();
+    }
+  }, [location]);
+
+  // Actualizar región del mapa cuando cambia la ubicación
+  useEffect(() => {
+    if (location) {
+      setRegion({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+    }
+  }, [location]);
+
+  useEffect(() => {
+    // Polling automático cada 10 segundos
+    const interval = setInterval(() => {
+      if (location) {
+        cargarSolicitudes();
+      }
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [location]);
 
   const obtenerUbicacion = () => {
     Geolocation.getCurrentPosition(
@@ -52,19 +86,30 @@ export default function ModoConductorScreen({ navigation }) {
   };
 
   const cargarSolicitudes = async () => {
-    // if (!location) return; // Allow test without location
     setLoading(true);
     console.log('📡 ModoConductor: Buscando solicitudes...');
+    console.log('📍 ModoConductor: Ubicación:', location);
+    
     const result = await TransportService.listarSolicitudesDisponibles(
       location?.latitude || null,
       location?.longitude || null,
+      10, // radio de 10km para pruebas
     );
     setLoading(false);
 
-    console.log('📦 ModoConductor: Solicitudes result:', result.success, result.data?.aData?.solicitudes?.length);
+    console.log('📦 ModoConductor: Solicitudes result:', result.success);
+    console.log('📦 ModoConductor: Full response:', JSON.stringify(result.data, null, 2));
+    console.log('📦 ModoConductor: aData:', result.data?.aData);
+    console.log('📦 ModoConductor: Solicitudes count:', result.data?.aData?.solicitudes?.length);
 
     if (result.success) {
-      setSolicitudes(result.data.aData?.solicitudes || []);
+      // El backend retorna {aData: {solicitudes: [...]}}
+      const solicitudesData = result.data?.aData?.solicitudes || result.data?.solicitudes || [];
+      console.log('📦 ModoConductor: Solicitudes cargadas:', solicitudesData.length);
+      console.log('📦 ModoConductor: Primera solicitud:', solicitudesData[0]);
+      setSolicitudes(solicitudesData);
+    } else {
+      console.log('❌ ModoConductor: Error al cargar solicitudes:', result.error);
     }
   };
 
@@ -89,17 +134,18 @@ export default function ModoConductorScreen({ navigation }) {
           onPress: async () => {
             const result = await TransportService.aceptarSolicitud(solicitudId);
             if (result.success) {
-              Alert.alert('Éxito', 'Solicitud aceptada', [
-                {
-                  text: 'OK',
-                  onPress: () =>
-                    navigation.navigate('ViajeActivo', {
-                      viajeId: result.data.aData?.viaje_id,
-                    }),
-                },
-              ]);
+              // Obtener el viaje_id de la respuesta
+              const viajeId = result.data?.aData?.viaje_id || result.data?.viaje_id;
+              console.log('✅ Solicitud aceptada, viaje_id:', viajeId);
+              
+              if (viajeId) {
+                // Navegar directamente a la pantalla del viaje activo
+                navigation.navigate('ViajeActivo', { viajeId });
+              } else {
+                Alert.alert('Error', 'No se pudo obtener el ID del viaje');
+              }
             } else {
-              Alert.alert('Error', result.error);
+              Alert.alert('Error', result.error || 'No se pudo aceptar la solicitud');
             }
           },
         },
@@ -111,13 +157,9 @@ export default function ModoConductorScreen({ navigation }) {
     <View style={styles.container}>
       <MapView
         style={styles.map}
-        initialRegion={{
-          latitude: location?.latitude || -2.170998,
-          longitude: location?.longitude || -79.922359,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
-        showsUserLocation={true}>
+        region={region}
+        showsUserLocation={true}
+        onRegionChangeComplete={setRegion}>
         {solicitudes.map(solicitud => (
           <Marker
             key={solicitud.id}

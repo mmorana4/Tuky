@@ -135,18 +135,23 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
-    'http://127.0.0.1',
-    'http://localhost'
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'http://192.168.1.101:8000',
 ]
 
+# Permitir IPs locales de la red (192.168.x.x)
 CORS_ALLOWED_ORIGIN_REGEXES = [
-    'http://127.0.0.1',
-    'http://localhost'
+    r'^http://127\.0\.0\.1(:\d+)?$',
+    r'^http://localhost(:\d+)?$',
+    r'^http://192\.168\.\d+\.\d+(:\d+)?$',
+    r'^http://10\.0\.2\.2(:\d+)?$',  # Emulador Android
 ]
 
 CORS_ORIGIN_WHITELIST = [
-    'http://127.0.0.1',
-    'http://localhost'
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'http://192.168.1.101:8000',
 ]
 
 CORS_ALLOW_METHODS = [
@@ -159,8 +164,9 @@ CORS_ALLOW_METHODS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost',
-    'http://127.0.0.1'
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'http://192.168.1.101:8000',
 ]
 
 CORS_ALLOW_HEADERS = [

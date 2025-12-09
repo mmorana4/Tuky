@@ -24,15 +24,21 @@ export default function SolicitudesDisponiblesScreen({ navigation }) {
     }, []);
 
     useEffect(() => {
-        fetchSolicitudes();
+        if (location) {
+            fetchSolicitudes();
+        }
+    }, [location]);
 
+    useEffect(() => {
         // Poll every 10 seconds
         const interval = setInterval(() => {
-            fetchSolicitudes();
+            if (location) {
+                fetchSolicitudes();
+            }
         }, 10000);
 
         return () => clearInterval(interval);
-    }, []); // Run once on mount
+    }, [location]);
 
     const obtenerUbicacion = () => {
         Geolocation.getCurrentPosition(
@@ -51,25 +57,32 @@ export default function SolicitudesDisponiblesScreen({ navigation }) {
     };
 
     const fetchSolicitudes = async () => {
-        // if (!location) return; // Permitir buscar sin ubicación para pruebas
         console.log('📡 Fetching solicitudes... Location:', location);
 
         try {
             const result = await TransportService.listarSolicitudesDisponibles(
                 location?.latitude || null,
                 location?.longitude || null,
-                5, // radio 5km
+                10, // radio 10km para pruebas
             );
 
-            console.log('📦 Solicitudes result:', result.success, result.data?.solicitudes?.length);
+            console.log('📦 Solicitudes result:', result.success);
+            console.log('📦 Full result data:', JSON.stringify(result.data, null, 2));
+            console.log('📦 aData:', result.data?.aData);
+            console.log('📦 Solicitudes count:', result.data?.aData?.solicitudes?.length);
 
-            if (result.success && result.data?.solicitudes) {
-                setSolicitudes(result.data.solicitudes);
+            if (result.success) {
+                // El backend retorna {aData: {solicitudes: [...]}}
+                const solicitudesData = result.data?.aData?.solicitudes || result.data?.solicitudes || [];
+                console.log('📦 Solicitudes cargadas:', solicitudesData.length);
+                setSolicitudes(solicitudesData);
+            } else {
+                console.log('❌ Error al cargar solicitudes:', result.error);
             }
             setLoading(false);
             setRefreshing(false);
         } catch (error) {
-            console.error('Error fetching solicitudes:', error);
+            console.error('❌ Error fetching solicitudes:', error);
             setLoading(false);
             setRefreshing(false);
         }
@@ -86,8 +99,16 @@ export default function SolicitudesDisponiblesScreen({ navigation }) {
                     onPress: async () => {
                         const result = await TransportService.aceptarSolicitud(solicitud.id);
                         if (result.success) {
-                            Alert.alert('¡Éxito!', 'Solicitud aceptada. El pasajero fue notificado.');
-                            fetchSolicitudes(); // Refresh list
+                            // Obtener el viaje_id de la respuesta
+                            const viajeId = result.data?.aData?.viaje_id || result.data?.viaje_id;
+                            console.log('✅ Solicitud aceptada, viaje_id:', viajeId);
+                            
+                            if (viajeId) {
+                                // Navegar directamente a la pantalla del viaje activo
+                                navigation.navigate('ViajeActivo', { viajeId });
+                            } else {
+                                Alert.alert('Error', 'No se pudo obtener el ID del viaje');
+                            }
                         } else {
                             Alert.alert('Error', result.error || 'No se pudo aceptar');
                         }

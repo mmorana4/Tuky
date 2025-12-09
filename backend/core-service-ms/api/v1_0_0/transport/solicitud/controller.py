@@ -31,7 +31,8 @@ class SolicitudViajeController:
                     logger.error(f"Form validation failed!")
                     logger.error(f"Form errors: {form.errors}")
                     logger.error(f"Form errors as JSON: {form.errors.as_json()}")
-                    raise NameError(f"Debe ingresar la información en todos los campos. Detalles: {form.errors.as_json()}")
+                    from django.core.exceptions import ValidationError
+                    raise ValidationError(f"Debe ingresar la información en todos los campos. Detalles: {form.errors.as_json()}")
                 
                 cleaned_data = form.cleaned_data
                 logger.info(f"Cleaned data: {cleaned_data}")
@@ -40,7 +41,8 @@ class SolicitudViajeController:
                 resultado = service.crear_solicitud(cleaned_data, self.request.user)
                 
                 if not resultado.is_success:
-                    raise NameError(resultado.message)
+                    from django.core.exceptions import ValidationError
+                    raise ValidationError(resultado.message)
                 
                 self.response.set_success(True)
                 self.response.set_status(status.HTTP_201_CREATED)
@@ -72,7 +74,8 @@ class SolicitudViajeController:
             resultado = service.listar_solicitudes_disponibles(lat, lng, radio)
             
             if not resultado.is_success:
-                raise NameError(resultado.message)
+                from django.core.exceptions import ValidationError
+                raise ValidationError(resultado.message)
             
             self.response.set_success(True)
             self.response.set_status(status.HTTP_200_OK)
@@ -102,7 +105,8 @@ class SolicitudViajeController:
                 )
                 
                 if not resultado.is_success:
-                    raise NameError(resultado.message)
+                    from django.core.exceptions import ValidationError
+                    raise ValidationError(resultado.message)
                 
                 self.response.set_success(True)
                 self.response.set_status(status.HTTP_200_OK)
@@ -139,11 +143,23 @@ class SolicitudViajeController:
                     ).order_by('-fecha_aceptacion').first()
                     
                     if viaje and viaje.conductor:
-                        response_data['conductor'] = {
-                            'nombre': f"{viaje.conductor.first_name} {viaje.conductor.last_name}",
-                            'calificacion': '4.8',  # TODO: Calcular promedio real
-                            'placa': viaje.moto.placa if viaje.moto else None,
-                        }
+                        from security.models import Conductor
+                        try:
+                            conductor_profile = Conductor.objects.get(user=viaje.conductor)
+                            response_data['conductor'] = {
+                                'nombre': f"{viaje.conductor.first_name} {viaje.conductor.last_name}",
+                                'calificacion': str(conductor_profile.calificacion_promedio) if conductor_profile.calificacion_promedio else '5.0',
+                            }
+                            if viaje.moto:
+                                response_data['conductor']['placa'] = viaje.moto.placa
+                        except Conductor.DoesNotExist:
+                            response_data['conductor'] = {
+                                'nombre': f"{viaje.conductor.first_name} {viaje.conductor.last_name}",
+                                'calificacion': '5.0',
+                            }
+                        
+                        # Incluir viaje_id para navegación
+                        response_data['viaje_id'] = viaje.id
                         
                         # Calcular ETA (distancia / velocidad)
                         # Por ahora retornamos un valor fijo, TODO: calcular real
@@ -178,7 +194,8 @@ class SolicitudViajeController:
             resultado = service.cancelar_solicitud(solicitud_id, self.request.user)
             
             if not resultado.is_success:
-                raise NameError(resultado.message)
+                from django.core.exceptions import ValidationError
+                raise ValidationError(resultado.message)
             
             self.response.set_success(True)
             self.response.set_status(status.HTTP_200_OK)

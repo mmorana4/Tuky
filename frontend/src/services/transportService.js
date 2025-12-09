@@ -82,23 +82,6 @@ class TransportService {
     }
   }
 
-  async cancelarSolicitud(solicitudId) {
-    try {
-      const response = await api.post(
-        `${API_ENDPOINTS.TRANSPORT.SOLICITUDES}cancelar/`,
-        {
-          solicitud_id: solicitudId,
-        },
-      );
-      return { success: true, data: response.data };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Error al cancelar solicitud',
-      };
-    }
-  }
-
   async listarConductoresDisponibles(lat, lng, radio = 5) {
     try {
       const response = await api.get(
@@ -189,17 +172,57 @@ class TransportService {
 
   async completarViaje(viajeId, precioFinal = null) {
     try {
+      console.log('📡 Completar viaje - Request:', { viajeId, precioFinal, tipo: typeof precioFinal });
+      
+      const payload = {};
+      if (precioFinal !== null && precioFinal !== undefined && precioFinal !== '') {
+        const precioNum = typeof precioFinal === 'string' ? parseFloat(precioFinal) : precioFinal;
+        if (!isNaN(precioNum) && precioNum > 0) {
+          payload.precio_final = precioNum;
+        }
+      }
+      
+      console.log('📡 Payload enviado:', payload);
+      
       const response = await api.post(
         `${API_ENDPOINTS.TRANSPORT.VIAJES}${viajeId}/completar/`,
-        {
-          precio_final: precioFinal,
-        },
+        payload,
       );
-      return { success: true, data: response.data };
+      
+      console.log('📡 Completar viaje - Response:', response.data);
+      
+      // Verificar el formato de respuesta del backend
+      const responseData = response.data;
+      const isSuccess = responseData?.is_success !== false && 
+                       (responseData?.is_success === true || 
+                        responseData?.message || 
+                        response.status === 200);
+      
+      return { 
+        success: isSuccess, 
+        data: responseData,
+        message: responseData?.message || 'Viaje completado',
+        error: isSuccess ? null : (responseData?.message || 'Error desconocido'),
+      };
     } catch (error) {
+      console.error('❌ Error en completarViaje:', error);
+      console.error('❌ Error response data:', error.response?.data);
+      console.error('❌ Error response status:', error.response?.status);
+      
+      let errorMessage = 'Error al completar viaje';
+      if (error.response?.data) {
+        errorMessage = error.response.data.message || 
+                      error.response.data.error || 
+                      error.response.data.detail ||
+                      errorMessage;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       return {
         success: false,
-        error: error.response?.data?.message || 'Error al completar viaje',
+        error: errorMessage,
+        message: errorMessage,
       };
     }
   }

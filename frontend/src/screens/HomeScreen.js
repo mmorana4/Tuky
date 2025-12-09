@@ -28,18 +28,22 @@ export default function HomeScreen({ navigation }) {
   });
   const [solicitudes, setSolicitudes] = useState([]);
   const [conductores, setConductores] = useState([]);
+  const { user } = useAuth();
 
   useEffect(() => {
     requestLocationPermission();
   }, []);
 
   useEffect(() => {
-    // Poll conductors/requests every 10s
-    const interval = setInterval(() => {
+    // Poll conductors/requests every 5s
+    if (location) {
       cargarDatosMapa();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [location, user]);
+      const interval = setInterval(() => {
+        cargarDatosMapa();
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [location]);
 
   const cargarDatosMapa = async () => {
     await cargarSolicitudes();
@@ -49,13 +53,36 @@ export default function HomeScreen({ navigation }) {
   };
 
   const cargarConductores = async () => {
-    if (!location) return;
+    if (!location) {
+      console.log('📍 HomeScreen: No hay ubicación para cargar conductores');
+      return;
+    }
+    console.log('🚗 HomeScreen: Cargando conductores cerca de:', location);
     const result = await TransportService.listarConductoresDisponibles(
       location.latitude,
       location.longitude
     );
-    if (result.success && result.data?.conductores) {
-      setConductores(result.data.conductores);
+    console.log('🚗 HomeScreen: Resultado conductores:', result.success, result.data?.aData?.conductores?.length);
+
+    if (result.success) {
+      // El backend retorna {aData: {conductores: [...]}}
+      const conductoresData = result.data?.aData?.conductores || result.data?.conductores || [];
+      console.log('🚗 HomeScreen: Conductores encontrados:', conductoresData.length);
+
+      // Filtro adicional: solo mostrar conductores con ubicación válida
+      // (El backend ya filtra por estado='disponible', pero esto es una capa extra de seguridad)
+      const conductoresFiltrados = conductoresData.filter(c => {
+        const tieneUbicacion = c.ubicacion_actual_lat && c.ubicacion_actual_lng;
+        if (!tieneUbicacion) {
+          console.log('⚠️ HomeScreen: Conductor sin ubicación filtrado:', c.id);
+        }
+        return tieneUbicacion;
+      });
+
+      console.log('🚗 HomeScreen: Conductores con ubicación válida:', conductoresFiltrados.length);
+      setConductores(conductoresFiltrados);
+    } else {
+      console.log('❌ HomeScreen: Error al cargar conductores:', result.error);
     }
   };
 
@@ -134,14 +161,14 @@ export default function HomeScreen({ navigation }) {
       );
 
       if (result.success) {
-        setSolicitudes(result.data.data?.solicitudes || []);
+        // El backend retorna {aData: {solicitudes: [...]}}
+        const solicitudesData = result.data?.aData?.solicitudes || result.data?.solicitudes || [];
+        setSolicitudes(solicitudesData);
       }
     } catch (error) {
       console.log('Error cargando solicitudes:', error);
     }
   };
-
-  const { user } = useAuth();
 
   return (
     <View style={styles.container}>
@@ -157,6 +184,7 @@ export default function HomeScreen({ navigation }) {
               longitude: parseFloat(solicitud.origen_lng),
             }}
             title={`Solicitud: $${solicitud.precio_solicitado}`}
+            tracksViewChanges={false}
           >
             <View style={{ backgroundColor: 'white', padding: 5, borderRadius: 20, borderWidth: 2, borderColor: '#4CAF50' }}>
               <Icon name="person" size={20} color="#4CAF50" />
@@ -164,21 +192,32 @@ export default function HomeScreen({ navigation }) {
           </Marker>
         ))}
 
-        {conductores.map(conductor => (
-          <Marker
-            key={`cond-${conductor.id}`}
-            coordinate={{
-              latitude: parseFloat(conductor.ubicacion_actual_lat),
-              longitude: parseFloat(conductor.ubicacion_actual_lng),
-            }}
-            title={`Conductor: ${conductor.user__first_name}`}
-            pinColor="blue"
-          >
-            <View style={{ backgroundColor: 'white', padding: 5, borderRadius: 20, borderWidth: 2, borderColor: '#2196F3' }}>
-              <Icon name="bicycle" size={20} color="#2196F3" />
-            </View>
-          </Marker>
-        ))}
+        {conductores.map(conductor => {
+          const lat = conductor.ubicacion_actual_lat;
+          const lng = conductor.ubicacion_actual_lng;
+
+          if (!lat || !lng) {
+            console.log('⚠️ HomeScreen: Conductor sin ubicación:', conductor.id);
+            return null;
+          }
+
+          return (
+            <Marker
+              key={`cond-${conductor.id}`}
+              coordinate={{
+                latitude: parseFloat(lat),
+                longitude: parseFloat(lng),
+              }}
+              title={`Conductor: ${conductor.user__first_name || 'Conductor'}`}
+              tracksViewChanges={false}
+              pinColor="blue"
+            >
+              <View style={{ backgroundColor: 'white', padding: 5, borderRadius: 20, borderWidth: 2, borderColor: '#2196F3' }}>
+                <Icon name="bicycle" size={20} color="#2196F3" />
+              </View>
+            </Marker>
+          );
+        })}
       </MapView>
 
       {!user?.profile?.is_conductor && (
