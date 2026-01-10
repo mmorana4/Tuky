@@ -16,7 +16,8 @@ const getApiUrl = () => {
       return 'http://localhost:8000/api/security/v1.0.0';
     }
   }
-  return 'https://api.tukymotos.com/api/security/v1.0.0';
+  // URL de producción en Railway - ACTUALIZA ESTA URL con tu dominio de Railway
+  return 'https://tuky-production.up.railway.app/api/security/v1.0.0';
 };
 
 export const API_BASE_URL = getApiUrl();
