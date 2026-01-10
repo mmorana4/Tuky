@@ -5,9 +5,10 @@ from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import re_path, include, path, reverse
 from django.views.static import serve
+from django.views.decorators.csrf import csrf_exempt
 from server import settings
 from core.my_base import MY_ADMIN_URL
 
@@ -33,6 +34,8 @@ urlpatterns += [
     # path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     re_path(f'{MY_ADMIN_URL}', admin.site.urls),
     re_path(r'^api/security/', include('api.urls')),
-    # Ruta raíz: redirigir a la documentación de la API
+    # Ruta raíz: mostrar información de la API
     re_path(r'^$', lambda request: HttpResponseRedirect('/api/security/swagger/v1.0.0/'), name='root'),
+    # Ruta alternativa para la raíz
+    re_path(r'^api/$', lambda request: HttpResponseRedirect('/api/security/swagger/v1.0.0/'), name='api-root'),
 ]
