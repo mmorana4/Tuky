@@ -57,6 +57,15 @@ Esta guía te ayudará a desplegar tu proyecto de manera gratuita para hacer pru
    ALLOWED_HOSTS=*
    ```
    
+   **⚠️ IMPORTANTE - Generar SECRET_KEY:**
+   - `SECRET_KEY` es **OBLIGATORIO** en producción
+   - Genera uno seguro con este comando:
+     ```bash
+     python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+     ```
+   - O usa este generador online: https://djecrety.ir/
+   - **NUNCA** uses el valor por defecto en producción
+   
    **Nota importante:** 
    - Railway usa `${{Service.VARIABLE}}` para referenciar variables de otros servicios
    - Si Railway no genera estas referencias automáticamente, ve a cada servicio (PostgreSQL y Redis) y copia los valores reales de las variables
@@ -68,6 +77,10 @@ Esta guía te ayudará a desplegar tu proyecto de manera gratuita para hacer pru
    IP_LOAD_BALANCED_INTERNAL=127.0.0.1
    COOKIE_SESSION_NAME=123456
    ```
+   
+   **Variables con valores por defecto (pero deben configurarse en producción):**
+   - `SECRET_KEY`: Tiene un valor temporal por defecto, **DEBE cambiarse en producción**
+   - `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`: Tienen valores por defecto para desarrollo, **DEBEN configurarse en producción**
 
 7. **Configurar el comando de inicio (si es necesario):**
    - Railway debería detectar automáticamente el `start.sh` o `Procfile`

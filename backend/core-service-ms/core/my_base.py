@@ -3,13 +3,14 @@ from datetime import datetime, timedelta
 from decouple import config, Csv
 
 MY_DEBUG = config('DEBUG', default=True, cast=bool)
-MY_SECRET_KEY = config('SECRET_KEY', cast=str)
+# SECRET_KEY: Si no está definido, usar uno temporal (DEBE ser configurado en producción)
+MY_SECRET_KEY = config('SECRET_KEY', default='django-insecure-temporary-key-change-in-production-2025', cast=str)
 
-MY_DB_NAME = config('DB_NAME', cast=str)
-MY_DB_USER = config('DB_USER', cast=str)
-MY_DB_PASSWORD = config('DB_PASSWORD', cast=str)
-MY_DB_HOST = config('DB_HOST', cast=str)
-MY_DB_PORT = config('DB_PORT', cast=int)
+MY_DB_NAME = config('DB_NAME', default='tuky', cast=str)
+MY_DB_USER = config('DB_USER', default='postgres', cast=str)
+MY_DB_PASSWORD = config('DB_PASSWORD', default='postgres', cast=str)
+MY_DB_HOST = config('DB_HOST', default='localhost', cast=str)
+MY_DB_PORT = config('DB_PORT', default=5432, cast=int)
 MY_REDIS_HOST = config('REDIS_HOST', default='127.0.0.1', cast=str)
 MY_REDIS_PORT = config('REDIS_PORT', default='6379', cast=int)
 MY_REDIS_DB = config('REDIS_DB', default='0', cast=int)
