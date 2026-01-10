@@ -33,4 +33,6 @@ urlpatterns += [
     # path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     re_path(f'{MY_ADMIN_URL}', admin.site.urls),
     re_path(r'^api/security/', include('api.urls')),
+    # Ruta raíz: redirigir a la documentación de la API
+    re_path(r'^$', lambda request: HttpResponseRedirect('/api/security/swagger/v1.0.0/'), name='root'),
 ]
