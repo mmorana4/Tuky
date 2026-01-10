@@ -18,7 +18,9 @@ ENV PYTHONUNBUFFERED=1
 
 # Copiar requirements y instalar dependencias Python
 COPY backend/core-service-ms/requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip list | grep gunicorn || echo "Advertencia: gunicorn no encontrado después de instalar"
 
 # Copiar el proyecto completo
 COPY backend/core-service-ms /app

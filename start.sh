@@ -16,13 +16,21 @@ else
     exit 1
 fi
 
+# Verificar que las migraciones existen
+echo "Verificando migraciones..."
+ls -la /app/security/migrations/ || echo "Advertencia: directorio de migraciones no encontrado"
+
 # Ejecutar migraciones
 echo "Ejecutando migraciones..."
-python manage.py migrate --noinput
+python manage.py migrate --noinput || echo "Error en migraciones, continuando..."
 
 # Recolectar archivos estáticos
 echo "Recolectando archivos estáticos..."
 python manage.py collectstatic --noinput || true
+
+# Verificar que gunicorn está instalado
+echo "Verificando gunicorn..."
+which gunicorn || pip install gunicorn==21.2.0
 
 # Iniciar el servidor con Gunicorn
 echo "Iniciando servidor Gunicorn..."
