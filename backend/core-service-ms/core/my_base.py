@@ -12,8 +12,12 @@ MY_DB_PASSWORD = config('DB_PASSWORD', default='postgres', cast=str)
 MY_DB_HOST = config('DB_HOST', default='localhost', cast=str)
 MY_DB_PORT = config('DB_PORT', default=5432, cast=int)
 MY_REDIS_HOST = config('REDIS_HOST', default='127.0.0.1', cast=str)
-MY_REDIS_PORT = config('REDIS_PORT', default='6379', cast=int)
-MY_REDIS_DB = config('REDIS_DB', default='0', cast=int)
+# REDIS_PORT: Manejar valores vacíos o nulos
+REDIS_PORT_STR = config('REDIS_PORT', default='6379', cast=str)
+MY_REDIS_PORT = int(REDIS_PORT_STR) if REDIS_PORT_STR and REDIS_PORT_STR.strip() else 6379
+# REDIS_DB: Manejar valores vacíos o nulos
+REDIS_DB_STR = config('REDIS_DB', default='0', cast=str)
+MY_REDIS_DB = int(REDIS_DB_STR) if REDIS_DB_STR and REDIS_DB_STR.strip() else 0
 MY_REDIS_PASSWORD = config('REDIS_PASSWORD', default=None, cast=str)
 
 # Redis Cache Configuration
