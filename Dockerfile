@@ -23,6 +23,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar el proyecto completo
 COPY backend/core-service-ms /app
 
+# Crear settings.py si no existe (solo importa de settings_dev)
+RUN if [ ! -f /app/server/settings.py ]; then \
+        echo "# Importar configuración de desarrollo" > /app/server/settings.py && \
+        echo "from .settings_dev import *" >> /app/server/settings.py && \
+        echo "✓ settings.py creado automáticamente"; \
+    else \
+        echo "✓ settings.py ya existe"; \
+    fi
+
 # Verificar que los archivos se copiaron correctamente
 RUN echo "=== Verificando estructura del proyecto ===" && \
     ls -la /app && \
