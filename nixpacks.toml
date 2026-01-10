@@ -1,0 +1,19 @@
+[phases.setup]
+nixPkgs = ["python311", "postgresql"]
+
+[phases.install]
+cmds = [
+  "cd backend/core-service-ms",
+  "pip install --upgrade pip",
+  "pip install -r requirements.txt",
+  "python manage.py collectstatic --noinput"
+]
+
+[phases.build]
+cmds = [
+  "cd backend/core-service-ms",
+  "python manage.py migrate --noinput"
+]
+
+[start]
+cmd = "cd backend/core-service-ms && gunicorn server.wsgi:application --bind 0.0.0.0:$PORT"

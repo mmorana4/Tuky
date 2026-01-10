@@ -1,0 +1,22 @@
+# Archivos que Railway debe ignorar
+frontend/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.env
+.env.local
+.git/
+.gitignore
+node_modules/
+*.log
+*.txt
+!requirements.txt
+!runtime.txt
