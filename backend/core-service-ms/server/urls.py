@@ -30,12 +30,18 @@ if not settings.DEBUG:
                     re_path(r'^media/(?P<path>.*)$', protected_serve, {'document_root': settings.MEDIA_ROOT}),]
 
 
+# Vista simple para la raíz que no requiere autenticación
+@csrf_exempt
+def root_view(request):
+    """Vista raíz que redirige a Swagger sin requerir autenticación"""
+    return HttpResponseRedirect('/api/security/swagger/v1.0.0/')
+
 urlpatterns += [
     # path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
     re_path(f'{MY_ADMIN_URL}', admin.site.urls),
     re_path(r'^api/security/', include('api.urls')),
-    # Ruta raíz: mostrar información de la API
-    re_path(r'^$', lambda request: HttpResponseRedirect('/api/security/swagger/v1.0.0/'), name='root'),
+    # Ruta raíz: redirigir a la documentación de la API (sin requerir autenticación)
+    re_path(r'^$', root_view, name='root'),
     # Ruta alternativa para la raíz
-    re_path(r'^api/$', lambda request: HttpResponseRedirect('/api/security/swagger/v1.0.0/'), name='api-root'),
+    re_path(r'^api/$', root_view, name='api-root'),
 ]
