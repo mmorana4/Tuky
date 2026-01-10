@@ -75,8 +75,10 @@ Thumbs.db
 ._*
 
 # Archivos de migración (excepto __init__.py)
+# NO ignorar migraciones de security (necesarias para despliegue)
 **/migrations/*.py
 !**/migrations/__init__.py
+!backend/core-service-ms/security/migrations/*.py
 
 # Archivos de credenciales o configuración sensible
 *.pem
