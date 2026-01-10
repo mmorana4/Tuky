@@ -131,27 +131,41 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'  # If you wish to delay updates to your test suite
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
-CORS_ALLOW_ALL_ORIGINS = False
+# CORS: En producción (Railway) permitir todos los orígenes, en desarrollo solo localhost
+CORS_ALLOW_ALL_ORIGINS = not DEBUG if DEBUG is not None else True  # Permitir todos si DEBUG=False (producción)
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = [
-    'http://127.0.0.1:8000',
-    'http://localhost:8000',
-    'http://192.168.1.101:8000',
-]
+# Si DEBUG está activo, solo permitir localhost; si no, permitir todos
+if DEBUG:
+    CORS_ALLOWED_ORIGINS = [
+        'http://127.0.0.1:8000',
+        'http://localhost:8000',
+        'http://192.168.1.101:8000',
+    ]
+    CORS_ORIGIN_WHITELIST = [
+        'http://127.0.0.1:8000',
+        'http://localhost:8000',
+        'http://192.168.1.101:8000',
+    ]
+    CSRF_TRUSTED_ORIGINS = [
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
+        'http://192.168.1.101:8000',
+    ]
+else:
+    # En producción, permitir todos los orígenes (Railway)
+    CORS_ALLOWED_ORIGINS = ['*']  # Se ignora si CORS_ALLOW_ALL_ORIGINS=True
+    CORS_ORIGIN_WHITELIST = []
+    CSRF_TRUSTED_ORIGINS = ['*']  # Django no acepta '*', pero se manejará dinámicamente
 
-# Permitir IPs locales de la red (192.168.x.x)
+# Permitir IPs locales de la red (192.168.x.x) y dominios de Railway
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r'^http://127\.0\.0\.1(:\d+)?$',
     r'^http://localhost(:\d+)?$',
     r'^http://192\.168\.\d+\.\d+(:\d+)?$',
     r'^http://10\.0\.2\.2(:\d+)?$',  # Emulador Android
-]
-
-CORS_ORIGIN_WHITELIST = [
-    'http://127.0.0.1:8000',
-    'http://localhost:8000',
-    'http://192.168.1.101:8000',
+    r'^https?://.*\.railway\.app$',  # Dominios de Railway
+    r'^https?://.*\.up\.railway\.app$',  # Dominios de Railway (formato alternativo)
 ]
 
 CORS_ALLOW_METHODS = [
@@ -161,12 +175,6 @@ CORS_ALLOW_METHODS = [
     "PATCH",
     "POST",
     "PUT",
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
-    'http://192.168.1.101:8000',
 ]
 
 CORS_ALLOW_HEADERS = [
