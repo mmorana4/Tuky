@@ -66,10 +66,23 @@ Esta guía te ayudará a desplegar tu proyecto de manera gratuita para hacer pru
    - O usa este generador online: https://djecrety.ir/
    - **NUNCA** uses el valor por defecto en producción
    
+   **⚠️ CRÍTICO - Variables de Base de Datos:**
+   - Las variables `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` son **OBLIGATORIAS**
+   - Si no están configuradas, el proyecto intentará conectarse a `localhost` (que fallará en Railway)
+   - **Cómo obtener las variables en Railway:**
+     1. Ve a tu servicio PostgreSQL en Railway
+     2. En la pestaña "Variables", encontrarás:
+        - `PGDATABASE` → usar como `DB_NAME`
+        - `PGUSER` → usar como `DB_USER`
+        - `PGPASSWORD` → usar como `DB_PASSWORD`
+        - `PGHOST` → usar como `DB_HOST`
+        - `PGPORT` → usar como `DB_PORT`
+     3. O usa las referencias automáticas: `${{Postgres.DATABASE}}`, `${{Postgres.USER}}`, etc.
+   
    **Nota importante:** 
    - Railway usa `${{Service.VARIABLE}}` para referenciar variables de otros servicios
    - Si Railway no genera estas referencias automáticamente, ve a cada servicio (PostgreSQL y Redis) y copia los valores reales de las variables
-   - En PostgreSQL, busca: `DATABASE`, `USER`, `PASSWORD`, `HOST`, `PORT`
+   - En PostgreSQL, busca: `PGDATABASE`, `PGUSER`, `PGPASSWORD`, `PGHOST`, `PGPORT` (o `DATABASE`, `USER`, etc.)
    - En Redis, busca: `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` (si aplica)
    
    **Variables opcionales (tienen valores por defecto):**

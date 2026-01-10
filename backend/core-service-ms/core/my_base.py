@@ -10,7 +10,9 @@ MY_DB_NAME = config('DB_NAME', default='tuky', cast=str)
 MY_DB_USER = config('DB_USER', default='postgres', cast=str)
 MY_DB_PASSWORD = config('DB_PASSWORD', default='postgres', cast=str)
 MY_DB_HOST = config('DB_HOST', default='localhost', cast=str)
-MY_DB_PORT = config('DB_PORT', default=5432, cast=int)
+# DB_PORT: Manejar valores vacíos o nulos, y también valores string
+DB_PORT_STR = config('DB_PORT', default='5432', cast=str)
+MY_DB_PORT = int(DB_PORT_STR) if DB_PORT_STR and DB_PORT_STR.strip() else 5432
 MY_REDIS_HOST = config('REDIS_HOST', default='127.0.0.1', cast=str)
 # REDIS_PORT: Manejar valores vacíos o nulos
 REDIS_PORT_STR = config('REDIS_PORT', default='6379', cast=str)
