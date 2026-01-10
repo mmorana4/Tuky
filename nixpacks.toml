@@ -3,16 +3,14 @@ nixPkgs = ["python311", "postgresql"]
 
 [phases.install]
 cmds = [
-  "cd backend/core-service-ms",
-  "pip install --upgrade pip",
-  "pip install -r requirements.txt",
-  "python manage.py collectstatic --noinput"
+  "cd backend/core-service-ms && pip install --upgrade pip",
+  "cd backend/core-service-ms && pip install -r requirements.txt",
+  "cd backend/core-service-ms && python manage.py collectstatic --noinput"
 ]
 
 [phases.build]
 cmds = [
-  "cd backend/core-service-ms",
-  "python manage.py migrate --noinput"
+  "cd backend/core-service-ms && python manage.py migrate --noinput"
 ]
 
 [start]

@@ -1,8 +1,20 @@
 #!/bin/bash
 set -e
 
-# Cambiar al directorio del proyecto Django
-cd backend/core-service-ms
+# Detectar si estamos en Docker (código en /app) o Nixpacks (código en raíz)
+if [ -f "/app/manage.py" ]; then
+    # Estamos en Docker, el código ya está en /app
+    cd /app
+elif [ -f "backend/core-service-ms/manage.py" ]; then
+    # Estamos en Nixpacks, necesitamos cambiar al directorio
+    cd backend/core-service-ms
+elif [ -f "manage.py" ]; then
+    # Ya estamos en el directorio correcto
+    echo "Ya en directorio correcto"
+else
+    echo "Error: No se encontró manage.py"
+    exit 1
+fi
 
 # Ejecutar migraciones
 echo "Ejecutando migraciones..."
