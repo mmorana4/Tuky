@@ -16,7 +16,12 @@ SECRET_KEY = MY_SECRET_KEY
 
 DEBUG = MY_DEBUG
 
-ALLOWED_HOSTS = MY_ALLOWED_HOSTS
+# ALLOWED_HOSTS: En producción permitir todos los hosts (Railway asigna dominios dinámicamente)
+# Si MY_ALLOWED_HOSTS es '*', usarlo; si no, permitir todos en producción
+if not DEBUG:
+    ALLOWED_HOSTS = ['*']  # En producción, permitir todos los hosts
+else:
+    ALLOWED_HOSTS = MY_ALLOWED_HOSTS if isinstance(MY_ALLOWED_HOSTS, list) else ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
