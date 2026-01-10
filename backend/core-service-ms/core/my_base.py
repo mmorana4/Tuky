@@ -2,22 +2,27 @@ import os
 from datetime import datetime, timedelta
 from decouple import config, Csv
 
-MY_DEBUG = config('DEBUG', default=True, cast=bool)
-# SECRET_KEY: Si no está definido, usar uno temporal (DEBE ser configurado en producción)
-MY_SECRET_KEY = config('SECRET_KEY', default='django-insecure-temporary-key-change-in-production-2025', cast=str)
+# DEBUG: Buscar CORE_DEBUG primero (Railway), luego DEBUG
+MY_DEBUG = config('CORE_DEBUG', default=None, cast=bool) if config('CORE_DEBUG', default=None) is not None else config('DEBUG', default=True, cast=bool)
 
-MY_DB_NAME = config('DB_NAME', default='tuky', cast=str)
-MY_DB_USER = config('DB_USER', default='postgres', cast=str)
-MY_DB_PASSWORD = config('DB_PASSWORD', default='postgres', cast=str)
-MY_DB_HOST = config('DB_HOST', default='localhost', cast=str)
-# DB_PORT: Manejar valores vacíos o nulos, y también valores string
-DB_PORT_STR = config('DB_PORT', default='5432', cast=str)
-MY_DB_PORT = int(DB_PORT_STR) if DB_PORT_STR and DB_PORT_STR.strip() else 5432
-MY_REDIS_HOST = config('REDIS_HOST', default='127.0.0.1', cast=str)
-# REDIS_PORT: Manejar valores vacíos o nulos
-REDIS_PORT_STR = config('REDIS_PORT', default='6379', cast=str)
-MY_REDIS_PORT = int(REDIS_PORT_STR) if REDIS_PORT_STR and REDIS_PORT_STR.strip() else 6379
-# REDIS_DB: Manejar valores vacíos o nulos
+# SECRET_KEY: Buscar CORE_SECRET_KEY primero (Railway), luego SECRET_KEY
+MY_SECRET_KEY = config('CORE_SECRET_KEY', default=None, cast=str) if config('CORE_SECRET_KEY', default=None) is not None else config('SECRET_KEY', default='django-insecure-temporary-key-change-in-production-2025', cast=str)
+
+# Database: Buscar variables de Railway primero (POSTGRES_*), luego las estándar (DB_*)
+MY_DB_NAME = config('POSTGRES_DB', default=None, cast=str) if config('POSTGRES_DB', default=None) is not None else config('DB_NAME', default='tuky', cast=str)
+MY_DB_USER = config('POSTGRES_USER', default=None, cast=str) if config('POSTGRES_USER', default=None) is not None else config('DB_USER', default='postgres', cast=str)
+MY_DB_PASSWORD = config('POSTGRES_PASSWORD', default=None, cast=str) if config('POSTGRES_PASSWORD', default=None) is not None else config('DB_PASSWORD', default='postgres', cast=str)
+MY_DB_HOST = config('PGHOST', default=None, cast=str) if config('PGHOST', default=None) is not None else config('DB_HOST', default='localhost', cast=str)
+# DB_PORT: Buscar PGPORT primero (Railway), luego DB_PORT
+PGPORT_STR = config('PGPORT', default=None, cast=str) if config('PGPORT', default=None) is not None else config('DB_PORT', default='5432', cast=str)
+MY_DB_PORT = int(PGPORT_STR) if PGPORT_STR and PGPORT_STR.strip() else 5432
+
+# Redis: Buscar variables de Railway primero (REDISHOST, REDISPORT), luego las estándar
+MY_REDIS_HOST = config('REDISHOST', default=None, cast=str) if config('REDISHOST', default=None) is not None else config('REDIS_HOST', default='127.0.0.1', cast=str)
+# REDIS_PORT: Buscar REDISPORT primero (Railway), luego REDIS_PORT
+REDISPORT_STR = config('REDISPORT', default=None, cast=str) if config('REDISPORT', default=None) is not None else config('REDIS_PORT', default='6379', cast=str)
+MY_REDIS_PORT = int(REDISPORT_STR) if REDISPORT_STR and REDISPORT_STR.strip() else 6379
+# REDIS_DB: Ya está correcto, Railway usa REDIS_DB
 REDIS_DB_STR = config('REDIS_DB', default='0', cast=str)
 MY_REDIS_DB = int(REDIS_DB_STR) if REDIS_DB_STR and REDIS_DB_STR.strip() else 0
 MY_REDIS_PASSWORD = config('REDIS_PASSWORD', default=None, cast=str)
