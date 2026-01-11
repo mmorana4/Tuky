@@ -16,7 +16,6 @@ import Geolocation from 'react-native-geolocation-service';
 import Icon from 'react-native-vector-icons/Ionicons';
 import TransportService from '../services/transportService';
 import { useToast } from '../context/ToastContext';
-import { useToast } from '../context/ToastContext';
 
 export default function SolicitarViajeScreen({ navigation }) {
   const toast = useToast();
