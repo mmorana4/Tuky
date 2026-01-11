@@ -349,6 +349,10 @@ export default function SolicitarViajeScreen({ navigation }) {
   const handleSeleccionarMapaOrigen = () => {
     setModoSeleccionOrigen('mapa');
     setShowModalOrigen(false);
+    // Limpiar cualquier estado de ingresar
+    setDireccionIngresadaOrigen('');
+    setSugerenciasOrigen([]);
+    setMostrarSugerenciasOrigen(false);
     // Obtener ubicación actual para centrar el mapa
     Geolocation.getCurrentPosition(
       position => {
@@ -383,6 +387,8 @@ export default function SolicitarViajeScreen({ navigation }) {
         latitude: resultado.latitude,
         longitude: resultado.longitude,
       });
+      // Cerrar el modal de ingresar y limpiar el modo
+      setModoSeleccionOrigen(null);
       setShowModalDestino(true);
       setPaso('destino');
       setBuscandoDireccion(false);
@@ -395,6 +401,10 @@ export default function SolicitarViajeScreen({ navigation }) {
   const handleSeleccionarMapaDestino = () => {
     setModoSeleccionDestino('mapa');
     setShowModalDestino(false);
+    // Asegurarse de limpiar cualquier estado de ingresar
+    setDireccionIngresadaDestino('');
+    setSugerenciasDestino([]);
+    setMostrarSugerenciasDestino(false);
   };
 
   const handleIngresarDestino = () => {
@@ -433,6 +443,8 @@ export default function SolicitarViajeScreen({ navigation }) {
         setPrecioSugerido(suggested);
         setPrecio(suggested);
       }
+      // Cerrar el modal de ingresar y limpiar el modo
+      setModoSeleccionDestino(null);
       setBuscandoDireccion(false);
     } catch (error) {
       toast.showError('No se pudo encontrar la dirección. Intenta con otra dirección o selecciona en el mapa.');
@@ -466,12 +478,17 @@ export default function SolicitarViajeScreen({ navigation }) {
       const coord = e.nativeEvent.coordinate;
       setOrigen(coord);
       setOrigenAddress('Ubicación seleccionada en el mapa');
+      // Limpiar el modo de selección
+      setModoSeleccionOrigen(null);
       setShowModalDestino(true);
       setPaso('destino');
     } else if (paso === 'destino' && modoSeleccionDestino === 'mapa') {
       const newDestino = e.nativeEvent.coordinate;
       setDestino(newDestino);
       setDestinoAddress('Destino seleccionado en el mapa');
+      
+      // Limpiar el modo de selección para ocultar la instrucción
+      setModoSeleccionDestino(null);
 
       // Calculate distance and suggested price
       if (origen) {
@@ -597,12 +614,15 @@ export default function SolicitarViajeScreen({ navigation }) {
       </Modal>
 
       {/* Modal para ingresar dirección de origen */}
-      {modoSeleccionOrigen === 'ingresar' && !showModalOrigen && (
+      {modoSeleccionOrigen === 'ingresar' && !showModalOrigen && modoSeleccionOrigen !== 'mapa' && (
         <Modal
           visible={true}
           transparent={true}
           animationType="slide"
-          onRequestClose={() => setShowModalOrigen(true)}>
+          onRequestClose={() => {
+            setModoSeleccionOrigen(null);
+            setShowModalOrigen(true);
+          }}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Ingresar Dirección de Origen</Text>
@@ -642,7 +662,10 @@ export default function SolicitarViajeScreen({ navigation }) {
               <View style={styles.modalButtons}>
                 <TouchableOpacity
                   style={[styles.modalButton, styles.modalButtonSecondary]}
-                  onPress={() => setShowModalOrigen(true)}>
+                  onPress={() => {
+                    setModoSeleccionOrigen(null);
+                    setShowModalOrigen(true);
+                  }}>
                   <Text style={styles.modalButtonTextSecondary}>Cancelar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -696,12 +719,15 @@ export default function SolicitarViajeScreen({ navigation }) {
       </Modal>
 
       {/* Modal para ingresar dirección de destino */}
-      {modoSeleccionDestino === 'ingresar' && !showModalDestino && origen !== null && (
+      {modoSeleccionDestino === 'ingresar' && !showModalDestino && origen !== null && modoSeleccionDestino !== 'mapa' && (
         <Modal
           visible={true}
           transparent={true}
           animationType="slide"
-          onRequestClose={() => setShowModalDestino(true)}>
+          onRequestClose={() => {
+            setModoSeleccionDestino(null);
+            setShowModalDestino(true);
+          }}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Ingresar Dirección de Destino</Text>
@@ -741,7 +767,10 @@ export default function SolicitarViajeScreen({ navigation }) {
               <View style={styles.modalButtons}>
                 <TouchableOpacity
                   style={[styles.modalButton, styles.modalButtonSecondary]}
-                  onPress={() => setShowModalDestino(true)}>
+                  onPress={() => {
+                    setModoSeleccionDestino(null);
+                    setShowModalDestino(true);
+                  }}>
                   <Text style={styles.modalButtonTextSecondary}>Cancelar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
