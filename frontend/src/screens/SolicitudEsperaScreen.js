@@ -9,9 +9,13 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import TransportService from '../services/transportService';
+import { useConfirmDialog } from '../hooks/useConfirmDialog';
+import { useToast } from '../context/ToastContext';
 
 export default function SolicitudEsperaScreen({ route, navigation }) {
     const { solicitudId } = route.params;
+    const toast = useToast();
+    const { showConfirm, DialogComponent } = useConfirmDialog();
     const [estado, setEstado] = useState('pendiente');
     const [conductor, setConductor] = useState(null);
     const [etaMinutos, setEtaMinutos] = useState(null);
@@ -55,11 +59,10 @@ export default function SolicitudEsperaScreen({ route, navigation }) {
                     // Si se canceló (por usuario o sistema), volver al home sin alerta bloqueante
                     navigation.navigate('Home');
                 } else if (estadoActual === 'expirada') {
-                    Alert.alert(
-                        'Solicitud Expirada',
-                        'Tu solicitud no pudo ser completada',
-                        [{ text: 'OK', onPress: () => navigation.navigate('Home') }]
-                    );
+                    toast.showWarning('Tu solicitud expiró y no pudo ser completada');
+                    setTimeout(() => {
+                        navigation.navigate('Home');
+                    }, 2000);
                 }
             }
         } catch (error) {
@@ -68,25 +71,25 @@ export default function SolicitudEsperaScreen({ route, navigation }) {
     };
 
     const handleCancelar = () => {
-        Alert.alert(
-            'Cancelar Solicitud',
-            '¿Estás seguro de cancelar tu solicitud?',
-            [
-                { text: 'No', style: 'cancel' },
-                {
-                    text: 'Sí, Cancelar',
-                    style: 'destructive',
-                    onPress: async () => {
-                        const result = await TransportService.cancelarSolicitud(solicitudId);
-                        if (result.success) {
-                            navigation.navigate('Home');
-                        } else {
-                            Alert.alert('Error', result.error || 'No se pudo cancelar la solicitud');
-                        }
-                    },
-                },
-            ],
-        );
+        showConfirm({
+            title: 'Cancelar Solicitud',
+            message: '¿Estás seguro de cancelar tu solicitud?',
+            type: 'danger',
+            icon: 'close-circle',
+            confirmText: 'Sí, Cancelar',
+            cancelText: 'No',
+            onConfirm: async () => {
+                const result = await TransportService.cancelarSolicitud(solicitudId);
+                if (result.success) {
+                    toast.showSuccess('Solicitud cancelada');
+                    setTimeout(() => {
+                        navigation.navigate('Home');
+                    }, 1000);
+                } else {
+                    toast.showError(result.error || 'No se pudo cancelar la solicitud');
+                }
+            },
+        });
     };
 
     if (loading) {
@@ -144,7 +147,7 @@ export default function SolicitudEsperaScreen({ route, navigation }) {
                 ) : (
                     <TouchableOpacity
                         style={styles.mapButton}
-                        onPress={() => Alert.alert('Esperando', 'El viaje se está configurando...')}>
+                        onPress={() => toast.showInfo('El viaje se está configurando...')}>
                         <Icon name="map-outline" size={24} color="#fff" />
                         <Text style={styles.mapButtonText}>Ver en Mapa</Text>
                     </TouchableOpacity>
@@ -158,6 +161,8 @@ export default function SolicitudEsperaScreen({ route, navigation }) {
 
     return (
         <View style={styles.container}>
+            <DialogComponent />
+            
             <ActivityIndicator size="large" color="#2196F3" />
             <Text style={styles.title}>Buscando Conductor...</Text>
             <Text style={styles.subtitle}>

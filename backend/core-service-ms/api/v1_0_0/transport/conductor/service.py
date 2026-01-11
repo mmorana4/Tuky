@@ -1,5 +1,5 @@
 from django.utils import timezone
-from security.models import Conductor, User
+from security.models import Conductor, User, Profile
 from helpers.service_helper import HelperService
 from math import radians, sin, cos, asin, sqrt
 
@@ -16,10 +16,18 @@ class ConductorService(HelperService):
             if hasattr(usuario, 'conductor_profile'):
                 return self.error_response('El usuario ya está registrado como conductor')
             
+            # Crear el perfil de conductor
             conductor = Conductor.objects.create(
                 user=usuario,
                 **data
             )
+            
+            # Actualizar el Profile para marcar como conductor
+            profile = Profile.objects.filter(user=usuario, is_current=True).first()
+            if profile:
+                profile.is_conductor = True
+                profile.save()
+            
             return self.success_response({'id': conductor.id, 'conductor': conductor})
         except Exception as e:
             return self.error_response(str(e))

@@ -66,8 +66,12 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const reloadUser = async () => {
+    await loadUser();
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, reloadUser }}>
       {children}
     </AuthContext.Provider>
   );

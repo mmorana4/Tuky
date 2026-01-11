@@ -10,9 +10,29 @@ class ConductorService {
       );
       return { success: true, data: response.data };
     } catch (error) {
+      // Mejorar el manejo de errores
+      let errorMessage = 'Error al registrar conductor';
+      
+      if (error.response?.data) {
+        const data = error.response.data;
+        if (data.message) {
+          errorMessage = data.message;
+          // Si el mensaje es un array, convertirlo a string
+          if (Array.isArray(errorMessage)) {
+            errorMessage = errorMessage.join(', ');
+          }
+          // Limpiar formato de array si viene como string
+          if (typeof errorMessage === 'string' && errorMessage.includes('[')) {
+            errorMessage = errorMessage.replace(/[\[\]']/g, '');
+          }
+        } else if (data.error) {
+          errorMessage = data.error;
+        }
+      }
+      
       return {
         success: false,
-        error: error.response?.data?.message || 'Error al registrar conductor',
+        error: errorMessage,
       };
     }
   }

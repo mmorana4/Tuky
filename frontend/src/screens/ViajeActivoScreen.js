@@ -19,6 +19,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import TransportService from '../services/transportService';
 import ConductorService from '../services/conductorService';
+import { useConfirmDialog } from '../hooks/useConfirmDialog';
 
 
 const GOOGLE_MAPS_APIKEY = 'AIzaSyCUK0r2jPEqxWSMRj3GWmZRzo2hICdcq6o';
@@ -26,6 +27,7 @@ const GOOGLE_MAPS_APIKEY = 'AIzaSyCUK0r2jPEqxWSMRj3GWmZRzo2hICdcq6o';
 
 export default function ViajeActivoScreen({ route, navigation }) {
   const toast = useToast();
+  const { showConfirm, DialogComponent } = useConfirmDialog();
   const { viajeId } = route.params;
   const [viaje, setViaje] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -126,20 +128,15 @@ export default function ViajeActivoScreen({ route, navigation }) {
   };
 
   const handleCompletar = () => {
-    Alert.alert(
-      'Finalizar Viaje',
-      '¿Estás seguro que deseas finalizar el viaje?',
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Finalizar',
-          onPress: finalizarViaje,
-        },
-      ],
-    );
+    showConfirm({
+      title: 'Finalizar Viaje',
+      message: '¿Estás seguro que deseas finalizar el viaje?',
+      type: 'success',
+      icon: 'checkmark-circle',
+      confirmText: 'Finalizar',
+      cancelText: 'Cancelar',
+      onConfirm: finalizarViaje,
+    });
   };
 
   const finalizarViaje = async () => {
@@ -171,21 +168,15 @@ export default function ViajeActivoScreen({ route, navigation }) {
   };
 
   const handleCancelar = () => {
-    Alert.alert(
-      'Cancelar Viaje',
-      '¿Estás seguro que deseas cancelar el viaje? Esta acción no se puede deshacer.',
-      [
-        {
-          text: 'No, regresar',
-          style: 'cancel',
-        },
-        {
-          text: 'Sí, cancelar',
-          style: 'destructive',
-          onPress: cancelarViaje,
-        },
-      ],
-    );
+    showConfirm({
+      title: 'Cancelar Viaje',
+      message: '¿Estás seguro que deseas cancelar el viaje? Esta acción no se puede deshacer.',
+      type: 'danger',
+      icon: 'warning',
+      confirmText: 'Sí, cancelar',
+      cancelText: 'No, regresar',
+      onConfirm: cancelarViaje,
+    });
   };
 
   const cancelarViaje = async () => {
@@ -222,6 +213,8 @@ export default function ViajeActivoScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
+      <DialogComponent />
+      
       {/* ... MapView ... */}
       <MapView
         style={styles.map}
@@ -405,7 +398,14 @@ export default function ViajeActivoScreen({ route, navigation }) {
             </Text>
             <TouchableOpacity
               style={{ marginTop: 10 }}
-              onPress={() => Alert.alert('Contacto', `Llamar a ${esConductor ? viaje?.pasajero?.phone : viaje?.conductor?.phone || 'N/A'}`)}>
+              onPress={() => {
+                const phone = esConductor ? viaje?.pasajero?.phone : viaje?.conductor?.phone;
+                if (phone) {
+                  toast.showInfo(`Llamar a ${phone}`);
+                } else {
+                  toast.showWarning('Número de teléfono no disponible');
+                }
+              }}>
               <Icon name="call" size={24} color="#2E7D32" />
             </TouchableOpacity>
           </View>

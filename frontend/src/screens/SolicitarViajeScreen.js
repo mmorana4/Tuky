@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,11 +9,13 @@ import {
   ScrollView,
   ActivityIndicator,
   Modal,
+  FlatList,
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
 import Icon from 'react-native-vector-icons/Ionicons';
 import TransportService from '../services/transportService';
+import { useToast } from '../context/ToastContext';
 import { useToast } from '../context/ToastContext';
 
 export default function SolicitarViajeScreen({ navigation }) {
@@ -34,6 +36,13 @@ export default function SolicitarViajeScreen({ navigation }) {
   const [direccionIngresadaOrigen, setDireccionIngresadaOrigen] = useState('');
   const [direccionIngresadaDestino, setDireccionIngresadaDestino] = useState('');
   
+  // Estados para autocompletado
+  const [sugerenciasOrigen, setSugerenciasOrigen] = useState([]);
+  const [sugerenciasDestino, setSugerenciasDestino] = useState([]);
+  const [mostrarSugerenciasOrigen, setMostrarSugerenciasOrigen] = useState(false);
+  const [mostrarSugerenciasDestino, setMostrarSugerenciasDestino] = useState(false);
+  const debounceTimer = useRef(null);
+  
   // Estados del formulario
   const [precio, setPrecio] = useState('');
   const [metodoPago, setMetodoPago] = useState('efectivo');
@@ -52,6 +61,13 @@ export default function SolicitarViajeScreen({ navigation }) {
 
   useEffect(() => {
     // No obtener ubicación automáticamente, esperar a que el usuario elija
+    
+    // Limpiar timer al desmontar
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
   }, []);
 
   const obtenerUbicacionActual = () => {
@@ -81,7 +97,87 @@ export default function SolicitarViajeScreen({ navigation }) {
     );
   };
 
-  // Geocodificación simple usando Google Maps Geocoding API
+  // Autocompletado de direcciones usando Google Places Autocomplete API
+  const buscarSugerencias = async (input, tipo) => {
+    if (!input || input.length < 3) {
+      if (tipo === 'origen') {
+        setSugerenciasOrigen([]);
+        setMostrarSugerenciasOrigen(false);
+      } else {
+        setSugerenciasDestino([]);
+        setMostrarSugerenciasDestino(false);
+      }
+      return;
+    }
+
+    try {
+      const API_KEY = 'AIzaSyCUK0r2jPEqxWSMRj3GWmZRzo2hICdcq6o';
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&key=${API_KEY}&language=es&components=country:ec`
+      );
+      const data = await response.json();
+      
+      if (data.status === 'OK' && data.predictions) {
+        const sugerencias = data.predictions.map(prediction => ({
+          id: prediction.place_id,
+          description: prediction.description,
+          mainText: prediction.structured_formatting?.main_text || prediction.description,
+          secondaryText: prediction.structured_formatting?.secondary_text || '',
+        }));
+        
+        if (tipo === 'origen') {
+          setSugerenciasOrigen(sugerencias);
+          setMostrarSugerenciasOrigen(true);
+        } else {
+          setSugerenciasDestino(sugerencias);
+          setMostrarSugerenciasDestino(true);
+        }
+      } else {
+        if (tipo === 'origen') {
+          setSugerenciasOrigen([]);
+          setMostrarSugerenciasOrigen(false);
+        } else {
+          setSugerenciasDestino([]);
+          setMostrarSugerenciasDestino(false);
+        }
+      }
+    } catch (error) {
+      console.error('Error al buscar sugerencias:', error);
+      if (tipo === 'origen') {
+        setSugerenciasOrigen([]);
+        setMostrarSugerenciasOrigen(false);
+      } else {
+        setSugerenciasDestino([]);
+        setMostrarSugerenciasDestino(false);
+      }
+    }
+  };
+
+  // Geocodificación usando Place ID de Google Places
+  const geocodificarPlaceId = async (placeId) => {
+    try {
+      const API_KEY = 'AIzaSyCUK0r2jPEqxWSMRj3GWmZRzo2hICdcq6o';
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=geometry,formatted_address&key=${API_KEY}`
+      );
+      const data = await response.json();
+      
+      if (data.status === 'OK' && data.result) {
+        const location = data.result.geometry.location;
+        return {
+          latitude: location.lat,
+          longitude: location.lng,
+          address: data.result.formatted_address,
+        };
+      } else {
+        throw new Error('No se encontró la dirección');
+      }
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  // Geocodificación simple usando Google Maps Geocoding API (fallback)
   const geocodificarDireccion = async (direccion) => {
     try {
       const API_KEY = 'AIzaSyCUK0r2jPEqxWSMRj3GWmZRzo2hICdcq6o';
@@ -105,6 +201,98 @@ export default function SolicitarViajeScreen({ navigation }) {
     }
   };
 
+  // Manejar cambio de texto con debounce para autocompletado
+  const handleTextChangeOrigen = (text) => {
+    setDireccionIngresadaOrigen(text);
+    
+    // Limpiar timer anterior
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    
+    // Buscar sugerencias después de 500ms sin escribir
+    debounceTimer.current = setTimeout(() => {
+      buscarSugerencias(text, 'origen');
+    }, 500);
+  };
+
+  const handleTextChangeDestino = (text) => {
+    setDireccionIngresadaDestino(text);
+    
+    // Limpiar timer anterior
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    
+    // Buscar sugerencias después de 500ms sin escribir
+    debounceTimer.current = setTimeout(() => {
+      buscarSugerencias(text, 'destino');
+    }, 500);
+  };
+
+  // Seleccionar sugerencia de origen
+  const seleccionarSugerenciaOrigen = async (sugerencia) => {
+    setDireccionIngresadaOrigen(sugerencia.description);
+    setMostrarSugerenciasOrigen(false);
+    setSugerenciasOrigen([]);
+    
+    setBuscandoDireccion(true);
+    try {
+      const resultado = await geocodificarPlaceId(sugerencia.id);
+      setOrigen({
+        latitude: resultado.latitude,
+        longitude: resultado.longitude,
+      });
+      setOrigenAddress(resultado.address);
+      setRegion({
+        ...region,
+        latitude: resultado.latitude,
+        longitude: resultado.longitude,
+      });
+      setShowModalDestino(true);
+      setPaso('destino');
+      setBuscandoDireccion(false);
+    } catch (error) {
+      toast.showError('No se pudo obtener la ubicación de la dirección seleccionada');
+      setBuscandoDireccion(false);
+    }
+  };
+
+  // Seleccionar sugerencia de destino
+  const seleccionarSugerenciaDestino = async (sugerencia) => {
+    setDireccionIngresadaDestino(sugerencia.description);
+    setMostrarSugerenciasDestino(false);
+    setSugerenciasDestino([]);
+    
+    setBuscandoDireccion(true);
+    try {
+      const resultado = await geocodificarPlaceId(sugerencia.id);
+      setDestino({
+        latitude: resultado.latitude,
+        longitude: resultado.longitude,
+      });
+      setDestinoAddress(resultado.address);
+      
+      // Calcular distancia y precio
+      if (origen) {
+        const dist = calculateDistance(
+          origen.latitude,
+          origen.longitude,
+          resultado.latitude,
+          resultado.longitude
+        );
+        setDistancia(dist);
+        const suggested = calculateSuggestedPrice(dist);
+        setPrecioSugerido(suggested);
+        setPrecio(suggested);
+      }
+      setBuscandoDireccion(false);
+    } catch (error) {
+      toast.showError('No se pudo obtener la ubicación de la dirección seleccionada');
+      setBuscandoDireccion(false);
+    }
+  };
+
   const handleUsarUbicacionActual = () => {
     setModoSeleccionOrigen('actual');
     obtenerUbicacionActual();
@@ -113,6 +301,8 @@ export default function SolicitarViajeScreen({ navigation }) {
   const handleIngresarOrigen = () => {
     setModoSeleccionOrigen('ingresar');
     setShowModalOrigen(false);
+    setSugerenciasOrigen([]);
+    setMostrarSugerenciasOrigen(false);
   };
 
   const handleSeleccionarMapaOrigen = () => {
@@ -138,6 +328,7 @@ export default function SolicitarViajeScreen({ navigation }) {
       return;
     }
 
+    setMostrarSugerenciasOrigen(false);
     setBuscandoDireccion(true);
     try {
       const resultado = await geocodificarDireccion(direccionIngresadaOrigen);
@@ -168,6 +359,8 @@ export default function SolicitarViajeScreen({ navigation }) {
   const handleIngresarDestino = () => {
     setModoSeleccionDestino('ingresar');
     setShowModalDestino(false);
+    setSugerenciasDestino([]);
+    setMostrarSugerenciasDestino(false);
   };
 
   const handleConfirmarDireccionDestino = async () => {
@@ -176,6 +369,7 @@ export default function SolicitarViajeScreen({ navigation }) {
       return;
     }
 
+    setMostrarSugerenciasDestino(false);
     setBuscandoDireccion(true);
     try {
       const resultado = await geocodificarDireccion(direccionIngresadaDestino);
@@ -305,6 +499,10 @@ export default function SolicitarViajeScreen({ navigation }) {
     setShowModalDestino(false);
     setModoSeleccionOrigen(null);
     setModoSeleccionDestino(null);
+    setSugerenciasOrigen([]);
+    setSugerenciasDestino([]);
+    setMostrarSugerenciasOrigen(false);
+    setMostrarSugerenciasDestino(false);
   };
 
   return (
@@ -367,13 +565,39 @@ export default function SolicitarViajeScreen({ navigation }) {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Ingresar Dirección de Origen</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ej: Av. 9 de Octubre y Malecón, Guayaquil"
-                placeholderTextColor="#999"
-                value={direccionIngresadaOrigen}
-                onChangeText={setDireccionIngresadaOrigen}
-              />
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ej: Av. 9 de Octubre y Malecón, Guayaquil"
+                  placeholderTextColor="#999"
+                  value={direccionIngresadaOrigen}
+                  onChangeText={handleTextChangeOrigen}
+                  autoFocus={true}
+                />
+                {mostrarSugerenciasOrigen && sugerenciasOrigen.length > 0 && (
+                  <View style={styles.sugerenciasContainer}>
+                    <FlatList
+                      data={sugerenciasOrigen}
+                      keyExtractor={(item) => item.id}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          style={styles.sugerenciaItem}
+                          onPress={() => seleccionarSugerenciaOrigen(item)}>
+                          <Icon name="location" size={20} color="#2196F3" />
+                          <View style={styles.sugerenciaText}>
+                            <Text style={styles.sugerenciaMainText}>{item.mainText}</Text>
+                            {item.secondaryText && (
+                              <Text style={styles.sugerenciaSecondaryText}>{item.secondaryText}</Text>
+                            )}
+                          </View>
+                        </TouchableOpacity>
+                      )}
+                      style={styles.sugerenciasList}
+                      nestedScrollEnabled={true}
+                    />
+                  </View>
+                )}
+              </View>
               <View style={styles.modalButtons}>
                 <TouchableOpacity
                   style={[styles.modalButton, styles.modalButtonSecondary]}
@@ -440,13 +664,39 @@ export default function SolicitarViajeScreen({ navigation }) {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Ingresar Dirección de Destino</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ej: Mall del Sol, Guayaquil"
-                placeholderTextColor="#999"
-                value={direccionIngresadaDestino}
-                onChangeText={setDireccionIngresadaDestino}
-              />
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ej: Mall del Sol, Guayaquil"
+                  placeholderTextColor="#999"
+                  value={direccionIngresadaDestino}
+                  onChangeText={handleTextChangeDestino}
+                  autoFocus={true}
+                />
+                {mostrarSugerenciasDestino && sugerenciasDestino.length > 0 && (
+                  <View style={styles.sugerenciasContainer}>
+                    <FlatList
+                      data={sugerenciasDestino}
+                      keyExtractor={(item) => item.id}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          style={styles.sugerenciaItem}
+                          onPress={() => seleccionarSugerenciaDestino(item)}>
+                          <Icon name="location" size={20} color="#2196F3" />
+                          <View style={styles.sugerenciaText}>
+                            <Text style={styles.sugerenciaMainText}>{item.mainText}</Text>
+                            {item.secondaryText && (
+                              <Text style={styles.sugerenciaSecondaryText}>{item.secondaryText}</Text>
+                            )}
+                          </View>
+                        </TouchableOpacity>
+                      )}
+                      style={styles.sugerenciasList}
+                      nestedScrollEnabled={true}
+                    />
+                  </View>
+                )}
+              </View>
               <View style={styles.modalButtons}>
                 <TouchableOpacity
                   style={[styles.modalButton, styles.modalButtonSecondary]}
@@ -725,6 +975,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 40,
     maxHeight: '80%',
+    minHeight: '40%',
   },
   modalTitle: {
     fontSize: 22,
@@ -840,6 +1091,57 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 14,
     color: '#333',
+  },
+  // Estilos para autocompletado
+  inputContainer: {
+    position: 'relative',
+    zIndex: 1,
+  },
+  sugerenciasContainer: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginTop: 5,
+    maxHeight: 250,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    zIndex: 1000,
+  },
+  sugerenciasList: {
+    maxHeight: 250,
+  },
+  sugerenciaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    backgroundColor: '#fff',
+  },
+  sugerenciaText: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  sugerenciaMainText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 2,
+  },
+  sugerenciaSecondaryText: {
+    fontSize: 13,
+    color: '#666',
   },
 });
 
