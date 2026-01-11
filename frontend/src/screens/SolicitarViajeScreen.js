@@ -111,12 +111,15 @@ export default function SolicitarViajeScreen({ navigation }) {
 
     try {
       const API_KEY = 'AIzaSyCUK0r2jPEqxWSMRj3GWmZRzo2hICdcq6o';
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&key=${API_KEY}&language=es&components=country:ec`
-      );
+      const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(input)}&key=${API_KEY}&language=es&components=country:ec`;
+      
+      console.log('🔍 Buscando sugerencias para:', input);
+      const response = await fetch(url);
       const data = await response.json();
       
-      if (data.status === 'OK' && data.predictions) {
+      console.log('📦 Respuesta de Places API:', data.status, data.error_message || '');
+      
+      if (data.status === 'OK' && data.predictions && data.predictions.length > 0) {
         const sugerencias = data.predictions.map(prediction => ({
           id: prediction.place_id,
           description: prediction.description,
@@ -124,6 +127,7 @@ export default function SolicitarViajeScreen({ navigation }) {
           secondaryText: prediction.structured_formatting?.secondary_text || '',
         }));
         
+        console.log('✅ Sugerencias encontradas:', sugerencias.length);
         if (tipo === 'origen') {
           setSugerenciasOrigen(sugerencias);
           setMostrarSugerenciasOrigen(true);
@@ -131,7 +135,28 @@ export default function SolicitarViajeScreen({ navigation }) {
           setSugerenciasDestino(sugerencias);
           setMostrarSugerenciasDestino(true);
         }
+      } else if (data.status === 'ZERO_RESULTS') {
+        // No hay resultados, pero no es un error
+        console.log('⚠️ No se encontraron resultados');
+        if (tipo === 'origen') {
+          setSugerenciasOrigen([]);
+          setMostrarSugerenciasOrigen(false);
+        } else {
+          setSugerenciasDestino([]);
+          setMostrarSugerenciasDestino(false);
+        }
+      } else if (data.status === 'REQUEST_DENIED') {
+        console.error('❌ API key rechazada o no tiene permisos:', data.error_message);
+        toast.showError('Error de configuración de la API. Contacta al administrador.');
+        if (tipo === 'origen') {
+          setSugerenciasOrigen([]);
+          setMostrarSugerenciasOrigen(false);
+        } else {
+          setSugerenciasDestino([]);
+          setMostrarSugerenciasDestino(false);
+        }
       } else {
+        console.warn('⚠️ Estado de API desconocido:', data.status, data.error_message);
         if (tipo === 'origen') {
           setSugerenciasOrigen([]);
           setMostrarSugerenciasOrigen(false);
@@ -141,7 +166,8 @@ export default function SolicitarViajeScreen({ navigation }) {
         }
       }
     } catch (error) {
-      console.error('Error al buscar sugerencias:', error);
+      console.error('❌ Error al buscar sugerencias:', error);
+      toast.showError('Error al buscar direcciones. Verifica tu conexión a internet.');
       if (tipo === 'origen') {
         setSugerenciasOrigen([]);
         setMostrarSugerenciasOrigen(false);
@@ -180,23 +206,39 @@ export default function SolicitarViajeScreen({ navigation }) {
   const geocodificarDireccion = async (direccion) => {
     try {
       const API_KEY = 'AIzaSyCUK0r2jPEqxWSMRj3GWmZRzo2hICdcq6o';
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(direccion)}&key=${API_KEY}`
-      );
+      const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(direccion)}&key=${API_KEY}&language=es&region=ec`;
+      
+      console.log('🔍 Geocodificando dirección:', direccion);
+      const response = await fetch(url);
       const data = await response.json();
       
-      if (data.status === 'OK' && data.results.length > 0) {
+      console.log('📦 Respuesta de Geocoding API:', data.status, data.error_message || '');
+      
+      if (data.status === 'OK' && data.results && data.results.length > 0) {
         const location = data.results[0].geometry.location;
+        const address = data.results[0].formatted_address;
+        console.log('✅ Dirección encontrada:', address);
         return {
           latitude: location.lat,
           longitude: location.lng,
-          address: data.results[0].formatted_address,
+          address: address,
         };
+      } else if (data.status === 'ZERO_RESULTS') {
+        console.warn('⚠️ No se encontraron resultados para:', direccion);
+        throw new Error('No se encontró la dirección. Intenta con una dirección más específica o selecciona en el mapa.');
+      } else if (data.status === 'REQUEST_DENIED') {
+        console.error('❌ API key rechazada:', data.error_message);
+        throw new Error('Error de configuración de la API. Contacta al administrador.');
       } else {
-        throw new Error('No se encontró la dirección');
+        console.warn('⚠️ Estado de API desconocido:', data.status, data.error_message);
+        throw new Error(`Error al buscar la dirección: ${data.status}. ${data.error_message || ''}`);
       }
     } catch (error) {
-      throw error;
+      console.error('❌ Error en geocodificación:', error);
+      if (error.message) {
+        throw error;
+      }
+      throw new Error('Error al buscar la dirección. Verifica tu conexión a internet.');
     }
   };
 

@@ -16,6 +16,16 @@ class ConductorService(HelperService):
             if hasattr(usuario, 'conductor_profile'):
                 return self.error_response('El usuario ya está registrado como conductor')
             
+            # Establecer estado por defecto si no se proporciona
+            if 'estado' not in data or not data.get('estado'):
+                data['estado'] = 'no_disponible'
+            
+            # Remover campos de ubicación si no se proporcionan (son opcionales)
+            if 'ubicacion_actual_lat' in data and (not data.get('ubicacion_actual_lat') or data.get('ubicacion_actual_lat') == ''):
+                data.pop('ubicacion_actual_lat', None)
+            if 'ubicacion_actual_lng' in data and (not data.get('ubicacion_actual_lng') or data.get('ubicacion_actual_lng') == ''):
+                data.pop('ubicacion_actual_lng', None)
+            
             # Crear el perfil de conductor
             conductor = Conductor.objects.create(
                 user=usuario,
