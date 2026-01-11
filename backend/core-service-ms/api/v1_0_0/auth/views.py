@@ -89,16 +89,72 @@ class RegisterView(APIView):
                 role = Role.objects.filter(is_active=True).first()
             
             # Crear perfil con todos los campos requeridos
-            Profile.objects.create(
+            profile = Profile.objects.create(
                 user=user,
                 role=role,
                 branch=branch,
                 is_current=True,
             )
             
+            # Si se registra como conductor, crear perfil de conductor
+            is_conductor = data.get('is_conductor', False)
+            if is_conductor:
+                # Validar campos requeridos para conductor
+                conductor_fields = ['telefono', 'licencia_numero', 'licencia_vencimiento']
+                for field in conductor_fields:
+                    if not data.get(field):
+                        # Si falta algún campo, eliminar el usuario creado
+                        user.delete()
+                        return Response({
+                            'is_success': False,
+                            'message': f'El campo {field} es requerido para registrarse como conductor'
+                        }, status=status.HTTP_400_BAD_REQUEST)
+                
+                # Verificar si el número de licencia ya existe
+                from security.models import Conductor
+                if Conductor.objects.filter(licencia_numero=data['licencia_numero']).exists():
+                    user.delete()
+                    return Response({
+                        'is_success': False,
+                        'message': 'El número de licencia ya está registrado'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                
+                # Crear perfil de conductor
+                try:
+                    from datetime import datetime
+                    # Convertir fecha de string a objeto date
+                    fecha_vencimiento = datetime.strptime(data['licencia_vencimiento'], '%Y-%m-%d').date()
+                    
+                    Conductor.objects.create(
+                        user=user,
+                        telefono=data['telefono'],
+                        licencia_numero=data['licencia_numero'],
+                        licencia_vencimiento=fecha_vencimiento,
+                        estado='no_disponible',  # Por defecto no disponible hasta verificación
+                    )
+                    
+                    # Marcar el perfil como conductor
+                    profile.is_conductor = True
+                    profile.save()
+                    
+                except ValueError as e:
+                    # Si hay error en el formato de fecha, eliminar el usuario
+                    user.delete()
+                    return Response({
+                        'is_success': False,
+                        'message': f'Formato de fecha inválido. Use YYYY-MM-DD: {str(e)}'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                except Exception as e:
+                    # Si hay otro error, eliminar el usuario
+                    user.delete()
+                    return Response({
+                        'is_success': False,
+                        'message': f'Error al crear perfil de conductor: {str(e)}'
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
             return Response({
                 'is_success': True,
-                'message': 'Usuario registrado exitosamente'
+                'message': 'Conductor registrado exitosamente' if is_conductor else 'Usuario registrado exitosamente'
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:

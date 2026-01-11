@@ -11,26 +11,56 @@ import {
 import authService from '../../services/authService';
 
 export default function RegisterScreen({ navigation }) {
+  const [tipoUsuario, setTipoUsuario] = useState('pasajero'); // 'pasajero' o 'conductor'
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
     first_name: '',
     last_name: '',
+    // Campos adicionales para conductor
+    telefono: '',
+    licencia_numero: '',
+    licencia_vencimiento: '',
   });
 
   const handleRegister = async () => {
-    // Validar campos
+    // Validar campos básicos
     if (!formData.username || !formData.password || !formData.email || !formData.first_name || !formData.last_name) {
-      Alert.alert('Error', 'Todos los campos son requeridos');
+      Alert.alert('Error', 'Todos los campos básicos son requeridos');
       return;
     }
 
+    // Si es conductor, validar campos adicionales
+    if (tipoUsuario === 'conductor') {
+      if (!formData.telefono || !formData.licencia_numero || !formData.licencia_vencimiento) {
+        Alert.alert('Error', 'Para registrarse como conductor, complete todos los campos (teléfono, número de licencia y vencimiento)');
+        return;
+      }
+    }
+
     try {
-      const result = await authService.register(formData);
+      // Preparar datos para enviar
+      const dataToSend = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        is_conductor: tipoUsuario === 'conductor',
+      };
+
+      // Si es conductor, agregar campos adicionales
+      if (tipoUsuario === 'conductor') {
+        dataToSend.telefono = formData.telefono;
+        dataToSend.licencia_numero = formData.licencia_numero;
+        dataToSend.licencia_vencimiento = formData.licencia_vencimiento;
+      }
+
+      const result = await authService.register(dataToSend);
 
       if (result.success) {
-        Alert.alert('Éxito', 'Usuario registrado correctamente', [
+        Alert.alert('Éxito', tipoUsuario === 'conductor' ? 'Conductor registrado correctamente' : 'Usuario registrado correctamente', [
           {
             text: 'OK',
             onPress: () => navigation.navigate('Login'),
@@ -47,6 +77,24 @@ export default function RegisterScreen({ navigation }) {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Crear Cuenta</Text>
+
+      {/* Selector de tipo de usuario */}
+      <View style={styles.selectorContainer}>
+        <TouchableOpacity
+          style={[styles.selectorButton, tipoUsuario === 'pasajero' && styles.selectorButtonActive]}
+          onPress={() => setTipoUsuario('pasajero')}>
+          <Text style={[styles.selectorText, tipoUsuario === 'pasajero' && styles.selectorTextActive]}>
+            Pasajero
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.selectorButton, tipoUsuario === 'conductor' && styles.selectorButtonActive]}
+          onPress={() => setTipoUsuario('conductor')}>
+          <Text style={[styles.selectorText, tipoUsuario === 'conductor' && styles.selectorTextActive]}>
+            Conductor
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       <TextInput
         style={styles.input}
@@ -92,8 +140,42 @@ export default function RegisterScreen({ navigation }) {
         secureTextEntry
       />
 
+      {/* Campos adicionales para conductor */}
+      {tipoUsuario === 'conductor' && (
+        <>
+          <Text style={styles.sectionTitle}>Datos de Conductor</Text>
+          
+          <TextInput
+            style={styles.input}
+            placeholder="Teléfono"
+            placeholderTextColor="#999"
+            value={formData.telefono}
+            onChangeText={text => setFormData({ ...formData, telefono: text })}
+            keyboardType="phone-pad"
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Número de Licencia"
+            placeholderTextColor="#999"
+            value={formData.licencia_numero}
+            onChangeText={text => setFormData({ ...formData, licencia_numero: text })}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Vencimiento de Licencia (YYYY-MM-DD)"
+            placeholderTextColor="#999"
+            value={formData.licencia_vencimiento}
+            onChangeText={text => setFormData({ ...formData, licencia_vencimiento: text })}
+          />
+        </>
+      )}
+
       <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Registrarse</Text>
+        <Text style={styles.buttonText}>
+          {tipoUsuario === 'conductor' ? 'Registrarse como Conductor' : 'Registrarse'}
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -117,6 +199,38 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 40,
     marginBottom: 30,
+    color: '#2196F3',
+  },
+  selectorContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+    padding: 4,
+  },
+  selectorButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  selectorButtonActive: {
+    backgroundColor: '#2196F3',
+  },
+  selectorText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
+  },
+  selectorTextActive: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 10,
+    marginBottom: 10,
     color: '#2196F3',
   },
   input: {

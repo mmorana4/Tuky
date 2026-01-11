@@ -37,48 +37,82 @@ return 'https://tu-dominio.railway.app/api/security/v1.0.0';
 
 ## 📦 Paso 2: Generar APK para Android
 
-### Opción A: APK de Desarrollo (Debug) - Más Fácil
+### ⚠️ IMPORTANTE: Usar APK de Release
+
+**El APK de debug requiere Metro bundler corriendo**, por lo que no funcionará en un dispositivo sin conexión a tu computadora. **Debes generar un APK de release** que incluye el bundle de JavaScript empaquetado.
+
+### Opción A: Generar APK de Release (RECOMENDADO) ✅
 
 1. **Abre una terminal** en la carpeta `frontend`
 
-2. **Conecta tu dispositivo Android** por USB o inicia un emulador
-
-3. **Habilita "Opciones de desarrollador"** en tu Android:
-   - Ve a Configuración → Acerca del teléfono
-   - Toca 7 veces en "Número de compilación"
-   - Ve a Configuración → Opciones de desarrollador
-   - Activa "Depuración USB"
-
-4. **Genera el APK:**
+2. **Genera el bundle de JavaScript:**
    ```bash
    cd frontend
-   npm install
+   mkdir -p android/app/src/main/assets
+   npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+   ```
+
+3. **Genera el APK de release:**
+   ```bash
+   cd android
+   .\gradlew.bat assembleRelease    # Windows
+   # o
+   ./gradlew assembleRelease        # Linux/Mac
+   ```
+
+4. **El APK estará en:**
+   ```
+   frontend/android/app/build/outputs/apk/release/app-release.apk
+   ```
+
+### Opción B: APK de Desarrollo (Solo para desarrollo con Metro)
+
+**⚠️ Solo funciona si Metro bundler está corriendo en tu computadora**
+
+1. **Abre una terminal** en la carpeta `frontend`
+
+2. **Inicia Metro bundler:**
+   ```bash
+   cd frontend
+   npx react-native start
+   ```
+
+3. **En otra terminal, instala en el dispositivo:**
+   ```bash
+   cd frontend
    npx react-native run-android
    ```
 
-   Esto instalará la app directamente en tu dispositivo.
+   Esto instalará la app directamente en tu dispositivo, pero **requiere que Metro esté corriendo**.
 
-### Opción B: Generar APK Manualmente
+5. **Transfiere el APK a tu dispositivo** usando uno de estos métodos:
 
-1. **Abre una terminal** en la carpeta `frontend/android`
+   **Método A: Por USB (Más rápido)**
+   - Conecta tu dispositivo Android por USB
+   - Copia el archivo `app-release.apk` a la carpeta "Descargas" o "Download" de tu dispositivo
+   - Desconecta el USB
 
-2. **Genera el APK de debug:**
-   ```bash
-   cd frontend/android
-   ./gradlew assembleDebug
-   ```
+   **Método B: Por Email**
+   - Envía el APK por email a ti mismo
+   - Abre el email en tu dispositivo
+   - Descarga el archivo adjunto
 
-3. **El APK estará en:**
-   ```
-   frontend/android/app/build/outputs/apk/debug/app-debug.apk
-   ```
+   **Método C: Por Google Drive / Dropbox**
+   - Sube el APK a Google Drive o Dropbox
+   - Abre la app en tu dispositivo
+   - Descarga el APK
 
-4. **Transfiere el APK a tu dispositivo** (por USB, email, o Google Drive)
+   **Método D: Por WhatsApp / Telegram**
+   - Envía el APK a ti mismo por WhatsApp o Telegram
+   - Descarga el archivo desde la conversación
 
-5. **Instala el APK:**
-   - En tu dispositivo, ve a Configuración → Seguridad
-   - Activa "Fuentes desconocidas" o "Instalar apps desconocidas"
-   - Abre el archivo APK y sigue las instrucciones
+6. **Instala el APK:**
+   - En tu dispositivo Android, ve a **Configuración → Seguridad**
+   - Activa **"Fuentes desconocidas"** o **"Instalar apps desconocidas"**
+     - En Android 8+: Ve a la app que usarás para instalar (ej: "Archivos") y activa "Permitir desde esta fuente"
+   - Abre el archivo APK desde el administrador de archivos
+   - Toca "Instalar" y sigue las instrucciones
+   - Una vez instalado, puedes desactivar "Fuentes desconocidas" por seguridad
 
 ### Opción C: APK de Producción (Release) - Para Distribución
 
