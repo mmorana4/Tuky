@@ -9,8 +9,10 @@ import {
   ScrollView,
 } from 'react-native';
 import authService from '../../services/authService';
+import { useToast } from '../../context/ToastContext';
 
 export default function RegisterScreen({ navigation }) {
+  const toast = useToast();
   const [tipoUsuario, setTipoUsuario] = useState('pasajero'); // 'pasajero' o 'conductor'
   const [formData, setFormData] = useState({
     username: '',
@@ -27,14 +29,14 @@ export default function RegisterScreen({ navigation }) {
   const handleRegister = async () => {
     // Validar campos básicos
     if (!formData.username || !formData.password || !formData.email || !formData.first_name || !formData.last_name) {
-      Alert.alert('Error', 'Todos los campos básicos son requeridos');
+      toast.showError('Todos los campos básicos son requeridos');
       return;
     }
 
     // Si es conductor, validar campos adicionales
     if (tipoUsuario === 'conductor') {
       if (!formData.telefono || !formData.licencia_numero || !formData.licencia_vencimiento) {
-        Alert.alert('Error', 'Para registrarse como conductor, complete todos los campos (teléfono, número de licencia y vencimiento)');
+        toast.showError('Para registrarse como conductor, complete todos los campos (teléfono, número de licencia y vencimiento)');
         return;
       }
     }
@@ -60,17 +62,15 @@ export default function RegisterScreen({ navigation }) {
       const result = await authService.register(dataToSend);
 
       if (result.success) {
-        Alert.alert('Éxito', tipoUsuario === 'conductor' ? 'Conductor registrado correctamente' : 'Usuario registrado correctamente', [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('Login'),
-          },
-        ]);
+        toast.showSuccess(tipoUsuario === 'conductor' ? 'Conductor registrado correctamente' : 'Usuario registrado correctamente');
+        setTimeout(() => {
+          navigation.navigate('Login');
+        }, 1500);
       } else {
-        Alert.alert('Error', result.error || 'No se pudo registrar');
+        toast.showError(result.error || 'No se pudo registrar');
       }
     } catch (error) {
-      Alert.alert('Error', 'Error al registrar usuario');
+      toast.showError('Error al registrar usuario');
     }
   };
 

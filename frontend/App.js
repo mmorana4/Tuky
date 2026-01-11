@@ -7,6 +7,7 @@ import { StatusBar } from 'react-native';
 import AuthNavigator from './src/navigation/AuthNavigator';
 import MainNavigator from './src/navigation/MainNavigator';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
+import { ToastProvider } from './src/context/ToastContext';
 
 const Stack = createStackNavigator();
 
@@ -36,9 +37,11 @@ function AppContent() {
 export default function App() {
   return (
     <PaperProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </ToastProvider>
     </PaperProvider>
   );
 }

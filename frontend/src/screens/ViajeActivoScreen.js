@@ -16,14 +16,16 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import Geolocation from 'react-native-geolocation-service';
 
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import TransportService from '../services/transportService';
-import ConductorService from '../services/conductorService'; // Assuming this exists, based on usage in line 54
+import ConductorService from '../services/conductorService';
 
 
 const GOOGLE_MAPS_APIKEY = 'AIzaSyCUK0r2jPEqxWSMRj3GWmZRzo2hICdcq6o';
 
 
 export default function ViajeActivoScreen({ route, navigation }) {
+  const toast = useToast();
   const { viajeId } = route.params;
   const [viaje, setViaje] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -93,12 +95,12 @@ export default function ViajeActivoScreen({ route, navigation }) {
         setViaje(viajeData);
       } else {
         console.error('❌ Error al cargar viaje:', result.error);
-        Alert.alert('Error', 'No se pudo cargar la información del viaje');
+        toast.showError('No se pudo cargar la información del viaje');
       }
     } catch (error) {
       console.error('❌ Error en cargarViaje:', error);
       setLoading(false);
-      Alert.alert('Error', 'Error al cargar el viaje');
+      toast.showError('Error al cargar el viaje');
     }
   };
 
@@ -106,7 +108,7 @@ export default function ViajeActivoScreen({ route, navigation }) {
     try {
       const response = await TransportService[endpoint](viajeId);
       if (response.success) {
-        Alert.alert('Éxito', mensaje);
+        toast.showSuccess(mensaje);
         cargarViaje(); // Recargar para actualizar estado
 
         // Si se debe notificar al usuario (cuando llega al origen)
@@ -115,11 +117,11 @@ export default function ViajeActivoScreen({ route, navigation }) {
           console.log('✅ Estado actualizado, el usuario será notificado');
         }
       } else {
-        Alert.alert('Error', response.error);
+        toast.showError(response.error || 'No se pudo actualizar el estado');
       }
     } catch (error) {
       console.error(error);
-      Alert.alert('Error', 'No se pudo actualizar el estado');
+      toast.showError('No se pudo actualizar el estado');
     }
   };
 
@@ -152,23 +154,19 @@ export default function ViajeActivoScreen({ route, navigation }) {
       setCompletando(false);
 
       if (result.success) {
-        Alert.alert('Éxito', 'Viaje completado correctamente', [
-          {
-            text: 'OK',
-            onPress: () => {
-              cargarViaje();
-              navigation.navigate('Home'); // Volver al home al terminar
-            },
-          },
-        ]);
+        toast.showSuccess('Viaje completado correctamente');
+        cargarViaje();
+        setTimeout(() => {
+          navigation.navigate('Home'); // Volver al home al terminar
+        }, 1500);
       } else {
         const errorMsg = result.error || result.message || 'No se pudo completar el viaje';
-        Alert.alert('Error', errorMsg);
+        toast.showError(errorMsg);
       }
     } catch (error) {
       console.error('❌ Error al completar viaje:', error);
       setCompletando(false);
-      Alert.alert('Error', 'Ocurrió un error al completar el viaje');
+      toast.showError('Ocurrió un error al completar el viaje');
     }
   };
 
@@ -197,19 +195,17 @@ export default function ViajeActivoScreen({ route, navigation }) {
       setCompletando(false);
 
       if (result.success) {
-        Alert.alert('Viaje Cancelado', 'El viaje ha sido cancelado exitosamente.', [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('Home'),
-          },
-        ]);
+        toast.showSuccess('El viaje ha sido cancelado exitosamente');
+        setTimeout(() => {
+          navigation.navigate('Home');
+        }, 1500);
       } else {
-        Alert.alert('Error', result.error || 'No se pudo cancelar el viaje');
+        toast.showError(result.error || 'No se pudo cancelar el viaje');
       }
     } catch (error) {
       console.error('Error al cancelar:', error);
       setCompletando(false);
-      Alert.alert('Error', 'Ocurrió un error al cancelar');
+      toast.showError('Ocurrió un error al cancelar');
     }
   };
 
