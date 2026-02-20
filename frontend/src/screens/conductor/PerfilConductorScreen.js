@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import ConductorService from '../../services/conductorService';
+import { colors, spacing } from '../../styles/theme';
 
-export default function PerfilConductorScreen({navigation}) {
+export default function PerfilConductorScreen({ navigation }) {
   const [perfil, setPerfil] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +23,6 @@ export default function PerfilConductorScreen({navigation}) {
     setLoading(true);
     const result = await ConductorService.obtenerPerfil();
     setLoading(false);
-
     if (result.success) {
       setPerfil(result.data.data?.conductor);
     }
@@ -30,7 +31,7 @@ export default function PerfilConductorScreen({navigation}) {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2196F3" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -41,7 +42,8 @@ export default function PerfilConductorScreen({navigation}) {
         <Text style={styles.title}>No eres conductor</Text>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate('RegistroConductor')}>
+          onPress={() => navigation.navigate('RegistroConductor')}
+        >
           <Text style={styles.buttonText}>Registrarse como Conductor</Text>
         </TouchableOpacity>
       </View>
@@ -49,37 +51,42 @@ export default function PerfilConductorScreen({navigation}) {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Mi Perfil de Conductor</Text>
 
       <View style={styles.section}>
         <Text style={styles.label}>Licencia:</Text>
         <Text style={styles.value}>{perfil.licencia_numero}</Text>
       </View>
-
       <View style={styles.section}>
         <Text style={styles.label}>Teléfono:</Text>
         <Text style={styles.value}>{perfil.telefono}</Text>
       </View>
-
       <View style={styles.section}>
         <Text style={styles.label}>Calificación Promedio:</Text>
         <Text style={styles.value}>{perfil.calificacion_promedio}/5.00</Text>
       </View>
-
       <View style={styles.section}>
         <Text style={styles.label}>Total de Viajes:</Text>
         <Text style={styles.value}>{perfil.total_viajes}</Text>
       </View>
-
       <View style={styles.section}>
         <Text style={styles.label}>Estado:</Text>
         <Text style={styles.value}>{perfil.estado}</Text>
       </View>
 
       <TouchableOpacity
+        style={styles.buttonAgregar}
+        onPress={() => navigation.navigate('AgregarVehiculoPaso1')}
+      >
+        <MaterialCommunityIcons name="motorbike" size={24} color="#1A2021" />
+        <Text style={styles.buttonAgregarText}>Agregar vehículo</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('ModoConductor')}>
+        onPress={() => navigation.navigate('ModoConductor')}
+      >
         <Text style={styles.buttonText}>Modo Conductor</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -89,42 +96,64 @@ export default function PerfilConductorScreen({navigation}) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
+  },
+  content: {
+    padding: spacing.lg,
+    paddingBottom: 40,
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: colors.background,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 30,
-    color: '#2196F3',
+    marginBottom: 24,
+    color: colors.primary,
   },
   section: {
     marginBottom: 20,
   },
   label: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textMuted,
     marginBottom: 5,
   },
   value: {
     fontSize: 18,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  buttonAgregar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+    padding: 15,
+    borderRadius: 12,
+    marginTop: 16,
+    gap: 8,
+  },
+  buttonAgregarText: {
+    fontSize: 17,
     fontWeight: 'bold',
+    color: '#1A2021',
   },
   button: {
-    backgroundColor: '#2196F3',
+    backgroundColor: colors.backgroundSecondary,
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: colors.primary,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 18,
+    color: colors.primary,
+    fontSize: 17,
     fontWeight: 'bold',
   },
 });

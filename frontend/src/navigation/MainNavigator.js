@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 // Screens
 import HomeScreen from '../screens/HomeScreen';
@@ -22,6 +23,16 @@ import MisMotosScreen from '../screens/moto/MisMotosScreen';
 import RegistrarMotoScreen from '../screens/moto/RegistrarMotoScreen';
 // Calificación
 import CalificarScreen from '../screens/calificacion/CalificarScreen';
+// Billetera
+import BilleteraScreen from '../screens/BilleteraScreen';
+// Seguridad
+import SeguridadScreen from '../screens/SeguridadScreen';
+// Configuración
+import ConfiguracionScreen from '../screens/ConfiguracionScreen';
+import TemaScreen from '../screens/TemaScreen';
+// Conductor - Agregar vehículo (paso 1 y 2)
+import AgregarVehiculoPaso1Screen from '../screens/conductor/AgregarVehiculoPaso1Screen';
+import AgregarVehiculoPaso2Screen from '../screens/conductor/AgregarVehiculoPaso2Screen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -43,7 +54,7 @@ function HomeStack() {
           <Stack.Screen
             name="SolicitudesDisponibles"
             component={SolicitudesDisponiblesScreen}
-            options={{ title: 'Solicitudes Disponibles' }}
+            options={{ title: 'Solicitudes Disponibles', headerShown: false }}
           />
           <Stack.Screen
             name="ViajeActivo"
@@ -62,7 +73,7 @@ function HomeStack() {
           <Stack.Screen
             name="HomeMain"
             component={HomeScreen}
-            options={{ title: 'Inicio' }}
+            options={{ title: 'Inicio', headerShown: false }}
           />
           <Stack.Screen
             name="SolicitarViaje"
@@ -107,9 +118,30 @@ function MotoStack() {
   );
 }
 
+function PerfilPasajeroStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="PerfilMain" component={PerfilPasajeroScreen} />
+      <Stack.Screen name="Seguridad" component={SeguridadScreen} />
+      <Stack.Screen name="Configuracion" component={ConfiguracionScreen} />
+      <Stack.Screen name="Tema" component={TemaScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function PerfilConductorStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="PerfilConductorMain" component={PerfilConductorScreen} />
+      <Stack.Screen name="AgregarVehiculoPaso1" component={AgregarVehiculoPaso1Screen} />
+      <Stack.Screen name="AgregarVehiculoPaso2" component={AgregarVehiculoPaso2Screen} />
+    </Stack.Navigator>
+  );
+}
+
 export default function MainNavigator() {
   const { user } = useAuth();
-  // Check if user is a conductor (has registered as conductor)
+  const { colors } = useTheme();
   const isConductor = user?.profile?.is_conductor || false;
 
   return (
@@ -122,6 +154,8 @@ export default function MainNavigator() {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'MisViajes') {
             iconName = focused ? 'map-marker' : 'map-marker-outline';
+          } else if (route.name === 'Billetera') {
+            iconName = 'wallet';
           } else if (route.name === 'Motos') {
             iconName = focused ? 'motorbike' : 'motorbike';
           } else if (route.name === 'Perfil') {
@@ -130,26 +164,38 @@ export default function MainNavigator() {
 
           return <Icon name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#2196F3',
-        tabBarInactiveTintColor: 'gray',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarStyle: { backgroundColor: colors.background, borderTopColor: colors.border },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
         headerShown: false,
       })}>
-      <Tab.Screen 
-        name="Home" 
+      <Tab.Screen
+        name="Home"
         component={HomeStack}
         options={{
-          title: isConductor ? 'Modo Conductor' : 'Inicio',
+          title: isConductor ? 'MODO CONDUCTOR' : 'INICIO',
         }}
       />
-      <Tab.Screen name="MisViajes" component={MisViajesScreen} />
+      <Tab.Screen
+        name="MisViajes"
+        component={MisViajesScreen}
+        options={{ title: 'VIAJES' }}
+      />
+      <Tab.Screen
+        name="Billetera"
+        component={BilleteraScreen}
+        options={{ title: 'BILLETERA' }}
+      />
       {isConductor && <Tab.Screen name="Motos" component={MotoStack} />}
       <Tab.Screen
         name="Perfil"
-        component={isConductor ? PerfilConductorScreen : PerfilPasajeroScreen}
+        component={isConductor ? PerfilConductorStack : PerfilPasajeroStack}
+        options={{ title: 'PERFIL' }}
       />
       <Tab.Screen
         name="PerfilConductor"
-        component={PerfilConductorScreen}
+        component={PerfilConductorStack}
         options={{ tabBarButton: () => null }}
       />
       <Tab.Screen

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import MapView, { Marker } from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
 import ConductorService from '../../services/conductorService';
 import TransportService from '../../services/transportService';
+import SolicitudEmergenteModal from '../../components/SolicitudEmergenteModal';
 
 export default function ModoConductorScreen({ navigation }) {
   const [location, setLocation] = useState(null);
@@ -24,6 +25,12 @@ export default function ModoConductorScreen({ navigation }) {
   const [solicitudes, setSolicitudes] = useState([]);
   const [estado, setEstado] = useState('no_disponible');
   const [loading, setLoading] = useState(false);
+  const [solicitudEmergente, setSolicitudEmergente] = useState(null);
+  const mostradosRef = useRef(new Set());
+  const estadoRef = useRef(estado);
+  const emergenteRef = useRef(null);
+  estadoRef.current = estado;
+  emergenteRef.current = solicitudEmergente?.id ?? null;
 
   useEffect(() => {
     obtenerUbicacion();
@@ -103,11 +110,16 @@ export default function ModoConductorScreen({ navigation }) {
     console.log('📦 ModoConductor: Solicitudes count:', result.data?.aData?.solicitudes?.length);
 
     if (result.success) {
-      // El backend retorna {aData: {solicitudes: [...]}}
       const solicitudesData = result.data?.aData?.solicitudes || result.data?.solicitudes || [];
-      console.log('📦 ModoConductor: Solicitudes cargadas:', solicitudesData.length);
-      console.log('📦 ModoConductor: Primera solicitud:', solicitudesData[0]);
       setSolicitudes(solicitudesData);
+
+      // Mostrar emergente si hay una solicitud nueva y estamos disponibles
+      if (estadoRef.current === 'disponible' && solicitudesData.length > 0 && !emergenteRef.current) {
+        const nueva = solicitudesData.find((s) => !mostradosRef.current.has(s.id));
+        if (nueva) {
+          setSolicitudEmergente(nueva);
+        }
+      }
     } else {
       console.log('❌ ModoConductor: Error al cargar solicitudes:', result.error);
     }
@@ -134,12 +146,8 @@ export default function ModoConductorScreen({ navigation }) {
           onPress: async () => {
             const result = await TransportService.aceptarSolicitud(solicitudId);
             if (result.success) {
-              // Obtener el viaje_id de la respuesta
               const viajeId = result.data?.aData?.viaje_id || result.data?.viaje_id;
-              console.log('✅ Solicitud aceptada, viaje_id:', viajeId);
-              
               if (viajeId) {
-                // Navegar directamente a la pantalla del viaje activo
                 navigation.navigate('ViajeActivo', { viajeId });
               } else {
                 Alert.alert('Error', 'No se pudo obtener el ID del viaje');
@@ -153,8 +161,38 @@ export default function ModoConductorScreen({ navigation }) {
     );
   };
 
+  const cerrarEmergente = (id) => {
+    if (id) mostradosRef.current.add(id);
+    setSolicitudEmergente(null);
+  };
+
+  const handleEmergenteAccept = async (solicitud) => {
+    const id = solicitud?.id;
+    cerrarEmergente(id);
+    const result = await TransportService.aceptarSolicitud(id);
+    if (result.success) {
+      const viajeId = result.data?.aData?.viaje_id || result.data?.viaje_id;
+      if (viajeId) navigation.navigate('ViajeActivo', { viajeId });
+      else Alert.alert('Error', 'No se pudo obtener el ID del viaje');
+    } else {
+      Alert.alert('Error', result.error || 'No se pudo aceptar');
+    }
+  };
+
+  const handleEmergenteReject = () => {
+    if (solicitudEmergente?.id) mostradosRef.current.add(solicitudEmergente.id);
+    setSolicitudEmergente(null);
+  };
+
   return (
     <View style={styles.container}>
+      <SolicitudEmergenteModal
+        visible={!!solicitudEmergente}
+        solicitud={solicitudEmergente}
+        onAccept={handleEmergenteAccept}
+        onReject={handleEmergenteReject}
+        onClose={() => cerrarEmergente(solicitudEmergente?.id)}
+      />
       <MapView
         style={styles.map}
         region={region}

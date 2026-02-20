@@ -8,21 +8,21 @@ import AuthNavigator from './src/navigation/AuthNavigator';
 import MainNavigator from './src/navigation/MainNavigator';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import { ToastProvider } from './src/context/ToastContext';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 
 const Stack = createStackNavigator();
 
 function AppContent() {
   const { user, loading } = useAuth();
-
-  console.log('AppContent render - loading:', loading, 'user:', user);
+  const { isDark } = useTheme();
 
   if (loading) {
-    return null; // O un componente de carga
+    return null;
   }
 
   return (
     <NavigationContainer>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           <Stack.Screen name="Main" component={MainNavigator} />
@@ -38,9 +38,11 @@ export default function App() {
   return (
     <PaperProvider>
       <ToastProvider>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </ThemeProvider>
       </ToastProvider>
     </PaperProvider>
   );

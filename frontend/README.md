@@ -34,6 +34,10 @@ npm run ios
 - `src/context/` - Contextos de React (Auth, etc.)
 - `src/utils/` - Utilidades y configuración
 
+## Seguridad
+
+Vulnerabilidades de dependencias: ver [SECURITY.md](./SECURITY.md). La crítica (fast-xml-parser) está corregida vía `overrides`; el resto son altas en el ecosistema React Native/Metro/Jest y requieren una futura actualización de React Native para corregirse sin romper el proyecto.
+
 ## Características
 
 - Autenticación con JWT
