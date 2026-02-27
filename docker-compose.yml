@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:15
+    image: postgis/postgis:15-3.4
     volumes:
       - tuky_postgres_data:/var/lib/postgresql/data
     environment:
@@ -11,7 +11,7 @@ services:
     ports:
       - "${POSTGRES_HOST_PORT:-5432}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -32,7 +32,7 @@ services:
     environment:
       - DEBUG=${CORE_DEBUG}
       - SECRET_KEY=${CORE_SECRET_KEY}
-      - DB_ENGINE=django.db.backends.postgresql
+      - DB_ENGINE=django.contrib.gis.db.backends.postgis
       - DB_NAME=${POSTGRES_DB:-tuky}
       - DB_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=123456
@@ -82,8 +82,5 @@ services:
 
 volumes:
   tuky_postgres_data:
-
-
-
 
 

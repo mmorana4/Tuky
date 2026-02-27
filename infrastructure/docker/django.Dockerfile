@@ -5,10 +5,14 @@ ENV PYTHONUNBUFFERED 1
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies (includes GDAL/GEOS for GeoDjango/PostGIS)
 RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
+    gdal-bin \
+    libgdal-dev \
+    libgeos-dev \
+    libproj-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies

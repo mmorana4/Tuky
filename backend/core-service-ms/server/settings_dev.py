@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
     'django.contrib.humanize',
+    'django.contrib.gis',          # v2.0 — PostGIS / GeoDjango
     *MY_INSTALLED_APPS
 ]
 
@@ -64,7 +65,7 @@ WSGI_APPLICATION = 'server.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': os.environ.get('DB_ENGINE', 'django.contrib.gis.db.backends.postgis'),
         'NAME': MY_DB_NAME,
         'HOST': MY_DB_HOST,
         'USER': MY_DB_USER,
@@ -231,3 +232,18 @@ AUTHENTICATION_BACKENDS = (
 MANAGERS = MY_MANAGERS
 
 AUTH_USER_MODEL = 'security.User'
+
+# ─────────────────────────────────────────────────────────────
+# Geo Services v2.0 — Alternativas OSS a Google Maps
+# Para producción, reemplazar con URLs de servidores propios.
+# ─────────────────────────────────────────────────────────────
+GEO_SERVICES = {
+    # Autocompletado de lugares (alternativa a Google Places Autocomplete)
+    'PHOTON_URL': 'https://photon.komoot.io/api/',
+    # Geocodificación directa e inversa (alternativa a Google Geocoding)
+    'NOMINATIM_URL': 'https://nominatim.openstreetmap.org/',
+    # Cálculo de rutas (alternativa a Google Directions)
+    'OSRM_URL': 'https://router.project-osrm.org/route/v1/driving/',
+    # Nominatim requiere User-Agent identificable (obligatorio por TOS)
+    'NOMINATIM_USER_AGENT': 'tuky-app/2.0 (soporte@tuky.ec)',
+}
