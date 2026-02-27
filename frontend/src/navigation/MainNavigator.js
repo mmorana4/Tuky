@@ -13,6 +13,10 @@ import MisViajesScreen from '../screens/MisViajesScreen';
 import PerfilScreen from '../screens/PerfilScreen';
 import PerfilPasajeroScreen from '../screens/PerfilPasajeroScreen';
 import ViajeActivoScreen from '../screens/ViajeActivoScreen';
+// v2.0 — Alternativas OSS a Google Maps
+import { USE_OSS_MAPS } from '../config/mapsConfig';
+import SolicitarViajeScreenV2 from '../screens/SolicitarViajeScreenV2';
+import ViajeActivoScreenV2 from '../screens/ViajeActivoScreenV2';
 // Conductor
 import ModoConductorScreen from '../screens/conductor/ModoConductorScreen';
 import PerfilConductorScreen from '../screens/conductor/PerfilConductorScreen';
@@ -58,8 +62,8 @@ function HomeStack() {
           />
           <Stack.Screen
             name="ViajeActivo"
-            component={ViajeActivoScreen}
-            options={{ title: 'Viaje en Curso' }}
+            component={USE_OSS_MAPS ? ViajeActivoScreenV2 : ViajeActivoScreen}
+            options={{ title: USE_OSS_MAPS ? 'Viaje en Curso (v2 OSM)' : 'Viaje en Curso' }}
           />
           <Stack.Screen
             name="Calificar"
@@ -77,8 +81,8 @@ function HomeStack() {
           />
           <Stack.Screen
             name="SolicitarViaje"
-            component={SolicitarViajeScreen}
-            options={{ title: 'Solicitar Viaje' }}
+            component={USE_OSS_MAPS ? SolicitarViajeScreenV2 : SolicitarViajeScreen}
+            options={{ title: USE_OSS_MAPS ? 'Solicitar Viaje (v2 OSM)' : 'Solicitar Viaje' }}
           />
           <Stack.Screen
             name="SolicitudEspera"
@@ -87,8 +91,8 @@ function HomeStack() {
           />
           <Stack.Screen
             name="ViajeActivo"
-            component={ViajeActivoScreen}
-            options={{ title: 'Viaje en Curso' }}
+            component={USE_OSS_MAPS ? ViajeActivoScreenV2 : ViajeActivoScreen}
+            options={{ title: USE_OSS_MAPS ? 'Viaje en Curso (v2 OSM)' : 'Viaje en Curso' }}
           />
           <Stack.Screen
             name="Calificar"
