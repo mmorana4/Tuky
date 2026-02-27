@@ -261,3 +261,6 @@ npm start -- --reset-cache
 ---
 
 ¿Necesitas ayuda con algún paso específico?
+
+
+haciendo una prueba con el git 
