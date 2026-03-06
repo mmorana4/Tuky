@@ -21,8 +21,13 @@ import {
     ActivityIndicator,
     Modal,
     FlatList,
+    Platform,
 } from 'react-native';
 import MapView, { Marker, UrlTile } from 'react-native-maps';
+import { USE_OSS_MAPS } from '../config/mapsConfig';
+import OSMMapWebView from '../components/OSMMapWebView';
+
+const ANDROID_OSM_SIN_MAPA = Platform.OS === 'android' && USE_OSS_MAPS;
 import Geolocation from 'react-native-geolocation-service';
 import Icon from 'react-native-vector-icons/Ionicons';
 import TransportService from '../services/transportService';
@@ -195,8 +200,8 @@ export default function SolicitarViajeScreenV2({ navigation }) {
             setModoSeleccionOrigen(null);
             setShowModalDestino(true);
             setPaso('destino');
-        } catch (e) {
-            toast.showError(e.message || 'No se pudo encontrar la dirección.');
+        } catch (err) {
+            toast.showError(err?.message || 'No se pudo encontrar la dirección.');
         } finally {
             setBuscandoDireccion(false);
         }
@@ -218,8 +223,8 @@ export default function SolicitarViajeScreenV2({ navigation }) {
                 setPrecio(suggested);
             }
             setModoSeleccionDestino(null);
-        } catch (e) {
-            toast.showError(e.message || 'No se pudo encontrar la dirección.');
+        } catch (err) {
+            toast.showError(err?.message || 'No se pudo encontrar la dirección.');
         } finally {
             setBuscandoDireccion(false);
         }
@@ -238,16 +243,16 @@ export default function SolicitarViajeScreenV2({ navigation }) {
         return Math.max(0.80, calculated).toFixed(2);
     };
 
-    const handleMapPress = e => {
+    const handleMapPress = ev => {
         if (paso === 'origen' && modoSeleccionOrigen === 'mapa') {
-            const coord = e.nativeEvent.coordinate;
+            const coord = ev?.nativeEvent?.coordinate;
             setOrigen(coord);
             setOrigenAddress('Ubicación seleccionada en el mapa');
             setModoSeleccionOrigen(null);
             setShowModalDestino(true);
             setPaso('destino');
         } else if (paso === 'destino' && modoSeleccionDestino === 'mapa') {
-            const newDestino = e.nativeEvent.coordinate;
+            const newDestino = ev?.nativeEvent?.coordinate;
             setDestino(newDestino);
             setDestinoAddress('Destino seleccionado en el mapa');
             setModoSeleccionDestino(null);
@@ -437,32 +442,44 @@ export default function SolicitarViajeScreenV2({ navigation }) {
                 </Modal>
             )}
 
-            {/* ─── Mapa v2.0: tiles OpenStreetMap ─── */}
-            <MapView
-                style={styles.map}
-                provider={null}
-                region={region}
-                onPress={handleMapPress}
-                onRegionChangeComplete={setRegion}
-                showsUserLocation>
-                {/* Tiles de OpenStreetMap (reemplaza Google Maps tiles) */}
-                <UrlTile
-                    urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    maximumZ={19}
-                    flipY={false}
-                    tileSize={256}
+            {/* ─── Mapa v2.0: en Android sin API key usamos WebView+Leaflet (OSM real) ─── */}
+            {ANDROID_OSM_SIN_MAPA ? (
+                <OSMMapWebView
+                    style={styles.map}
+                    region={region}
+                    onMapPress={handleMapPress}
+                    onRegionChangeComplete={setRegion}
+                    markers={[
+                        ...(origen ? [{ latitude: origen.latitude, longitude: origen.longitude, title: 'Origen' }] : []),
+                        ...(destino ? [{ latitude: destino.latitude, longitude: destino.longitude, title: 'Destino' }] : []),
+                    ]}
                 />
-                {origen && (
-                    <Marker coordinate={origen} title="Origen" pinColor="green">
-                        <View style={styles.markerContainer}><Icon name="location" size={30} color="#4CAF50" /></View>
-                    </Marker>
-                )}
-                {destino && (
-                    <Marker coordinate={destino} title="Destino" pinColor="red">
-                        <View style={styles.markerContainer}><Icon name="flag" size={30} color="#F44336" /></View>
-                    </Marker>
-                )}
-            </MapView>
+            ) : (
+                <MapView
+                    style={styles.map}
+                    provider={null}
+                    region={region}
+                    onPress={handleMapPress}
+                    onRegionChangeComplete={setRegion}
+                    showsUserLocation>
+                    <UrlTile
+                        urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        maximumZ={19}
+                        flipY={false}
+                        tileSize={256}
+                    />
+                    {origen && (
+                        <Marker coordinate={origen} title="Origen" pinColor="green">
+                            <View style={styles.markerContainer}><Icon name="location" size={30} color="#4CAF50" /></View>
+                        </Marker>
+                    )}
+                    {destino && (
+                        <Marker coordinate={destino} title="Destino" pinColor="red">
+                            <View style={styles.markerContainer}><Icon name="flag" size={30} color="#F44336" /></View>
+                        </Marker>
+                    )}
+                </MapView>
+            )}
 
             {paso === 'origen' && modoSeleccionOrigen === 'mapa' && (
                 <View style={styles.instructionOverlay}><Text style={styles.instructionText}>📍 Toca en el mapa para seleccionar el origen</Text></View>

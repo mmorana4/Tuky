@@ -7,8 +7,13 @@ import {
   ScrollView,
   RefreshControl,
   Alert,
+  Platform,
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
+import { USE_OSS_MAPS } from '../../config/mapsConfig';
+import OSMMapWebView from '../../components/OSMMapWebView';
+
+const ANDROID_OSM_SIN_MAPA = Platform.OS === 'android' && USE_OSS_MAPS;
 import Geolocation from 'react-native-geolocation-service';
 import ConductorService from '../../services/conductorService';
 import TransportService from '../../services/transportService';
@@ -193,23 +198,38 @@ export default function ModoConductorScreen({ navigation }) {
         onReject={handleEmergenteReject}
         onClose={() => cerrarEmergente(solicitudEmergente?.id)}
       />
-      <MapView
-        style={styles.map}
-        region={region}
-        showsUserLocation={true}
-        onRegionChangeComplete={setRegion}>
-        {solicitudes.map(solicitud => (
-          <Marker
-            key={solicitud.id}
-            coordinate={{
-              latitude: parseFloat(solicitud.origen_lat),
-              longitude: parseFloat(solicitud.origen_lng),
-            }}
-            title={`$${solicitud.precio_solicitado}`}
-            description={solicitud.origen_direccion}
-          />
-        ))}
-      </MapView>
+      {ANDROID_OSM_SIN_MAPA ? (
+        <OSMMapWebView
+          style={styles.map}
+          region={region}
+          onRegionChangeComplete={setRegion}
+          markers={solicitudes
+            .filter(s => s.origen_lat && s.origen_lng)
+            .map(s => ({
+              latitude: parseFloat(s.origen_lat),
+              longitude: parseFloat(s.origen_lng),
+              title: `$${s.precio_solicitado} — ${s.origen_direccion || ''}`,
+            }))}
+        />
+      ) : (
+        <MapView
+          style={styles.map}
+          region={region}
+          showsUserLocation={true}
+          onRegionChangeComplete={setRegion}>
+          {solicitudes.map(solicitud => (
+            <Marker
+              key={solicitud.id}
+              coordinate={{
+                latitude: parseFloat(solicitud.origen_lat),
+                longitude: parseFloat(solicitud.origen_lng),
+              }}
+              title={`$${solicitud.precio_solicitado}`}
+              description={solicitud.origen_direccion}
+            />
+          ))}
+        </MapView>
+      )}
 
       <View style={styles.overlay}>
         <View style={styles.estadoContainer}>

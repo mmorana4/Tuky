@@ -17,8 +17,13 @@ import {
     Alert,
     ActivityIndicator,
     ScrollView,
+    Platform,
 } from 'react-native';
 import MapView, { Marker, UrlTile } from 'react-native-maps';
+import { USE_OSS_MAPS } from '../config/mapsConfig';
+import OSMMapWebView from '../components/OSMMapWebView';
+
+const ANDROID_OSM_SIN_MAPA = Platform.OS === 'android' && USE_OSS_MAPS;
 import Icon from 'react-native-vector-icons/Ionicons';
 import Geolocation from 'react-native-geolocation-service';
 
@@ -176,62 +181,66 @@ export default function ViajeActivoScreenV2({ route, navigation }) {
         <View style={styles.container}>
             <DialogComponent />
 
-            {/* ─── Mapa v2.0: tiles OpenStreetMap + OSRM para rutas ─── */}
-            <MapView
-                style={styles.map}
-                provider={null}
-                region={region}
-                onRegionChangeComplete={setRegion}
-                showsUserLocation={esConductor}>
-                {/* Tiles OSM (reemplaza Google Maps tiles) */}
-                <UrlTile
-                    urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    maximumZ={19}
-                    flipY={false}
-                    tileSize={256}
+            {/* ─── Mapa v2.0: en Android sin API key usamos WebView+Leaflet (OSM real) ─── */}
+            {ANDROID_OSM_SIN_MAPA ? (
+                <OSMMapWebView
+                    style={styles.map}
+                    region={region}
+                    onRegionChangeComplete={setRegion}
+                    markers={[
+                        ...(ubicacionConductor && (mostrarRutaConductorAOrigen || viaje?.estado === 'en_viaje')
+                            ? [{ latitude: ubicacionConductor.latitude ?? ubicacionConductor.lat, longitude: ubicacionConductor.longitude ?? ubicacionConductor.lng, title: esConductor ? 'Tu ubicación' : 'Conductor' }]
+                            : []),
+                        ...(origenLatParsed && origenLngParsed ? [{ latitude: origenLatParsed, longitude: origenLngParsed, title: 'Origen' }] : []),
+                        ...(destinoLatParsed && destinoLngParsed ? [{ latitude: destinoLatParsed, longitude: destinoLngParsed, title: 'Destino' }] : []),
+                    ]}
                 />
-
-                {/* Marcador conductor */}
-                {ubicacionConductor && (mostrarRutaConductorAOrigen || viaje?.estado === 'en_viaje') && (
-                    <Marker coordinate={ubicacionConductor} title={esConductor ? 'Tu ubicación' : 'Conductor'} tracksViewChanges={false} pinColor="blue">
-                        <View style={styles.markerContainer}><Icon name="bicycle" size={30} color="#2196F3" /></View>
-                    </Marker>
-                )}
-
-                {/* Marcador origen */}
-                {origenLatParsed && origenLngParsed && (
-                    <Marker coordinate={{ latitude: origenLatParsed, longitude: origenLngParsed }} title="Origen" tracksViewChanges={false} pinColor="green">
-                        <View style={styles.markerContainer}><Icon name="location" size={30} color="#4CAF50" /></View>
-                    </Marker>
-                )}
-
-                {/* Marcador destino */}
-                {destinoLatParsed && destinoLngParsed && (
-                    <Marker coordinate={{ latitude: destinoLatParsed, longitude: destinoLngParsed }} title="Destino" tracksViewChanges={false} pinColor="red">
-                        <View style={styles.markerContainer}><Icon name="flag" size={30} color="#F44336" /></View>
-                    </Marker>
-                )}
-
-                {/* v2.0: Ruta conductor → origen con OSRM */}
-                {mostrarRutaConductorAOrigen && ubicacionConductor && origenLatParsed && origenLngParsed && (
-                    <OsrmRoute
-                        origin={ubicacionConductor}
-                        destination={{ latitude: origenLatParsed, longitude: origenLngParsed }}
-                        strokeColor="#FF9800"
-                        strokeWidth={4}
+            ) : (
+                <MapView
+                    style={styles.map}
+                    provider={null}
+                    region={region}
+                    onRegionChangeComplete={setRegion}
+                    showsUserLocation={esConductor}>
+                    <UrlTile
+                        urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        maximumZ={19}
+                        flipY={false}
+                        tileSize={256}
                     />
-                )}
-
-                {/* v2.0: Ruta origen → destino con OSRM */}
-                {mostrarRutaOrigenADestino && origenLatParsed && origenLngParsed && destinoLatParsed && destinoLngParsed && (
-                    <OsrmRoute
-                        origin={{ latitude: origenLatParsed, longitude: origenLngParsed }}
-                        destination={{ latitude: destinoLatParsed, longitude: destinoLngParsed }}
-                        strokeColor="#2196F3"
-                        strokeWidth={4}
-                    />
-                )}
-            </MapView>
+                    {ubicacionConductor && (mostrarRutaConductorAOrigen || viaje?.estado === 'en_viaje') && (
+                        <Marker coordinate={ubicacionConductor} title={esConductor ? 'Tu ubicación' : 'Conductor'} tracksViewChanges={false} pinColor="blue">
+                            <View style={styles.markerContainer}><Icon name="bicycle" size={30} color="#2196F3" /></View>
+                        </Marker>
+                    )}
+                    {origenLatParsed && origenLngParsed && (
+                        <Marker coordinate={{ latitude: origenLatParsed, longitude: origenLngParsed }} title="Origen" tracksViewChanges={false} pinColor="green">
+                            <View style={styles.markerContainer}><Icon name="location" size={30} color="#4CAF50" /></View>
+                        </Marker>
+                    )}
+                    {destinoLatParsed && destinoLngParsed && (
+                        <Marker coordinate={{ latitude: destinoLatParsed, longitude: destinoLngParsed }} title="Destino" tracksViewChanges={false} pinColor="red">
+                            <View style={styles.markerContainer}><Icon name="flag" size={30} color="#F44336" /></View>
+                        </Marker>
+                    )}
+                    {mostrarRutaConductorAOrigen && ubicacionConductor && origenLatParsed && origenLngParsed && (
+                        <OsrmRoute
+                            origin={ubicacionConductor}
+                            destination={{ latitude: origenLatParsed, longitude: origenLngParsed }}
+                            strokeColor="#FF9800"
+                            strokeWidth={4}
+                        />
+                    )}
+                    {mostrarRutaOrigenADestino && origenLatParsed && origenLngParsed && destinoLatParsed && destinoLngParsed && (
+                        <OsrmRoute
+                            origin={{ latitude: origenLatParsed, longitude: origenLngParsed }}
+                            destination={{ latitude: destinoLatParsed, longitude: destinoLngParsed }}
+                            strokeColor="#2196F3"
+                            strokeWidth={4}
+                        />
+                    )}
+                </MapView>
+            )}
 
             <View style={styles.info}>
                 <ScrollView>

@@ -11,7 +11,8 @@ import {
 import CalificacionService from '../../services/calificacionService';
 
 export default function CalificarScreen({route, navigation}) {
-  const {viajeId, calificadoId, esConductor} = route.params;
+  const params = route?.params || {};
+  const {viajeId, calificadoId, esConductor} = params;
   const [puntuacion, setPuntuacion] = useState(0);
   const [comentario, setComentario] = useState('');
   const [loading, setLoading] = useState(false);

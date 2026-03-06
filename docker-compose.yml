@@ -50,36 +50,6 @@ services:
       redis:
         condition: service_started
 
-  business-service:
-    build:
-      context: ./backend/business-service-ms
-      dockerfile: ../../infrastructure/docker/django.Dockerfile
-    volumes:
-      - ./backend/business-service-ms:/app
-    ports:
-      - "8001:8000"
-    environment:
-      - DEBUG=${BUSINESS_DEBUG}
-      - SECRET_KEY=${BUSINESS_SECRET_KEY}
-      - DB_NAME=${POSTGRES_DB:-tuky}
-      - DB_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=123456
-      - DB_PASSWORD=123456
-      - PGHOST=db
-      - DB_HOST=db
-      - PGPORT=5432
-      - DB_PORT=5432
-      - REDIS_HOST=${REDIS_HOST:-redis}
-      - REDIS_PORT=6379
-      - CORE_SERVICE_URL=http://core-service:8000
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_started
-      core-service:
-        condition: service_started
-
 volumes:
   tuky_postgres_data:
 

@@ -10,15 +10,13 @@ def autocomplete(query: str, countrycodes: str = "ec", limit: int = 5) -> list[d
     base_url = settings.GEO_SERVICES.get("PHOTON_URL", "https://photon.komoot.io/api/")
     params = {
         "q": query,
-        "limit": limit,
-        "lang": "es",
+        "limit": limit * 3,
     }
-    if countrycodes:
-        params["osm_tag"] = "place"
-        # Photon usa bbox o countrycode query param (no estándar, usamos filtrado post-respuesta)
+
+    headers = {"User-Agent": "TukyApp/1.0 (tuky-motos)"}
 
     try:
-        response = requests.get(base_url, params=params, timeout=10)
+        response = requests.get(base_url, params=params, headers=headers, timeout=10)
         response.raise_for_status()
         data = response.json()
 

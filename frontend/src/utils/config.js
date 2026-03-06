@@ -1,26 +1,28 @@
 // Configuración de la API
-// Para emulador Android usar: 10.0.2.2 (alias de localhost del host)
-// Para dispositivo físico usar: IP local de tu máquina (ej: 192.168.1.x)
-// Para iOS simulador usar: localhost
+// Emulador: USAR_DISPOSITIVO_FISICO = false (usa 10.0.2.2 = localhost del PC)
+// Celular físico: USAR_DISPOSITIVO_FISICO = true y pon abajo la IP de tu PC (ipconfig)
 import { Platform } from 'react-native';
 
-const getApiUrl = () => {
-  if (__DEV__) {
-    if (Platform.OS === 'android') {
-      // Para dispositivo físico: usar la IP WiFi de tu máquina
-      // IMPORTANTE: Asegúrate de que tu celular y PC estén en la misma red WiFi
-      // Si usas emulador, cambia a: 'http://10.0.2.2:8000/api/security/v1.0.0'
-      return 'http://192.168.1.103:8000/api/security/v1.0.0';
-    } else {
-      // Para iOS simulador o desarrollo web
-      return 'http://localhost:8000/api/security/v1.0.0';
-    }
-  }
-  // URL de producción en Railway - ACTUALIZA ESTA URL con tu dominio de Railway
-  return 'https://tuky-production.up.railway.app/api/security/v1.0.0';
-};
+// Cambia a true solo cuando pruebes en celular físico en la misma WiFi que el PC
+const USAR_DISPOSITIVO_FISICO = false;
+const IP_PC_EN_WIFI = '192.168.41.148';
 
-export const API_BASE_URL = getApiUrl();
+const PRODUCTION_URL = 'https://tuky-production.up.railway.app/api/security/v1.0.0';
+
+function getDevBaseUrl() {
+  if (Platform.OS === 'ios') return 'http://localhost:8000/api/security/v1.0.0';
+  const host = USAR_DISPOSITIVO_FISICO ? IP_PC_EN_WIFI : '10.0.2.2';
+  return `http://${host}:8000/api/security/v1.0.0`;
+}
+
+export function getApiBaseUrlAsync() {
+  const url = typeof __DEV__ !== 'undefined' && !__DEV__ ? PRODUCTION_URL : getDevBaseUrl();
+  return Promise.resolve(url);
+}
+
+export const API_BASE_URL = typeof __DEV__ !== 'undefined' && !__DEV__
+  ? PRODUCTION_URL
+  : getDevBaseUrl();
 
 export const API_ENDPOINTS = {
   AUTH: {

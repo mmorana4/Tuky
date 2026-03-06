@@ -1,6 +1,16 @@
 # Configuración de Android para Tuky (Windows)
 
-Si al ejecutar `npm run android` aparece **"adb no se reconoce"** o **"No emulators found"**, sigue estos pasos.
+Si al ejecutar `npm run android` aparece **"adb no se reconoce"**, **"No emulators found"** o **"Failed to install the app"** / **"Unsupported class file major version 65"**, sigue estos pasos.
+
+## 0. JDK 17 (necesario para el build)
+
+El proyecto usa Gradle 8.0, que **no** es compatible con Java 21 (el que trae Android Studio). Necesitas **JDK 17**:
+
+1. Descarga **Eclipse Temurin 17** (LTS): https://adoptium.net/temurin/releases/?version=17&os=windows&arch=x64&package=jdk
+2. Instala (por defecto suele quedar en `C:\Program Files\Eclipse Adoptium\jdk-17.x.x.x-hotspot\`).
+3. Opcional: crea la variable de entorno **JAVA_HOME** = ruta de instalación del JDK 17 (el script `run-android-windows.ps1` la busca automáticamente en rutas habituales).
+
+Sin JDK 17, el build puede fallar con *Unsupported class file major version 65*.
 
 ## 1. Android Studio y SDK
 

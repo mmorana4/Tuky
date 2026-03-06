@@ -6,46 +6,44 @@ class AuthService {
   async login(username, password) {
     try {
       console.log('=== AUTH SERVICE LOGIN ===');
-      console.log('Logging in user:', username);
-
       const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, {
         username,
         password,
       });
 
-      console.log('Backend response:', JSON.stringify(response.data, null, 2));
-
-      // Backend returns: {is_success, message, aData: {access, refresh, user}}
-      if (!response.data.is_success) {
-        console.log('Login failed:', response.data.message);
+      const data = response.data || {};
+      if (!data.is_success) {
         return {
           success: false,
-          error: response.data.message || 'Error al iniciar sesión',
+          error: data.message || 'Error al iniciar sesión',
         };
       }
 
-      const { access, refresh, user } = response.data.aData;
+      const aData = data.aData || {};
+      const access = aData.access;
+      const refresh = aData.refresh;
+      const user = aData.user;
 
-      console.log('Extracted - access:', access ? 'Present' : 'MISSING');
-      console.log('Extracted - refresh:', refresh ? 'Present' : 'MISSING');
-      console.log('Extracted - user:', JSON.stringify(user, null, 2));
+      if (!access || !user) {
+        return {
+          success: false,
+          error: data.message || 'Respuesta del servidor incompleta',
+        };
+      }
 
-      // Guardar tokens y datos del usuario
       await AsyncStorage.setItem('auth_token', access);
-      await AsyncStorage.setItem('refresh_token', refresh);
+      await AsyncStorage.setItem('refresh_token', refresh || '');
       await AsyncStorage.setItem('user_data', JSON.stringify(user));
-
-      console.log('Data saved to AsyncStorage');
-      console.log('Returning success with user');
 
       return { success: true, user, token: access };
     } catch (error) {
       console.error('Login error:', error);
-      console.error('Error response:', error.response?.data);
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Error al iniciar sesión',
-      };
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.detail ||
+        error.message ||
+        'Error al iniciar sesión. Comprueba la conexión.';
+      return { success: false, error: message };
     }
   }
 
@@ -61,10 +59,13 @@ class AuthService {
       }
     } catch (error) {
       console.error('Register error:', error);
-      return {
-        success: false,
-        error: error.response?.data?.message || 'Error al registrar usuario',
-      };
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.detail ||
+        (Array.isArray(error.response?.data) ? error.response.data.map(item => (item && (item.message || item)) || '').join(', ') : null) ||
+        error.message ||
+        'Error al registrar usuario. Comprueba la conexión y que la URL del backend sea correcta.';
+      return { success: false, error: message };
     }
   }
 

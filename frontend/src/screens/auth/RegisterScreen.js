@@ -5,14 +5,15 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import authService from '../../services/authService';
 import { useToast } from '../../context/ToastContext';
 
 export default function RegisterScreen({ navigation }) {
   const toast = useToast();
+  const [loading, setLoading] = useState(false);
   const [tipoUsuario, setTipoUsuario] = useState('pasajero'); // 'pasajero' o 'conductor'
   const [formData, setFormData] = useState({
     username: '',
@@ -41,8 +42,8 @@ export default function RegisterScreen({ navigation }) {
       }
     }
 
+    setLoading(true);
     try {
-      // Preparar datos para enviar
       const dataToSend = {
         username: formData.username,
         email: formData.email,
@@ -52,7 +53,6 @@ export default function RegisterScreen({ navigation }) {
         is_conductor: tipoUsuario === 'conductor',
       };
 
-      // Si es conductor, agregar campos adicionales
       if (tipoUsuario === 'conductor') {
         dataToSend.telefono = formData.telefono;
         dataToSend.licencia_numero = formData.licencia_numero;
@@ -70,7 +70,15 @@ export default function RegisterScreen({ navigation }) {
         toast.showError(result.error || 'No se pudo registrar');
       }
     } catch (error) {
-      toast.showError('Error al registrar usuario');
+      const msg =
+        error.response?.data?.message ||
+        error.response?.data?.detail ||
+        (typeof error.response?.data === 'string' ? error.response.data : null) ||
+        error.message ||
+        'Error al registrar. Revisa tu conexión y la URL del backend.';
+      toast.showError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -172,10 +180,17 @@ export default function RegisterScreen({ navigation }) {
         </>
       )}
 
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>
-          {tipoUsuario === 'conductor' ? 'Registrarse como Conductor' : 'Registrarse'}
-        </Text>
+      <TouchableOpacity
+        style={[styles.button, loading && styles.buttonDisabled]}
+        onPress={handleRegister}
+        disabled={loading}>
+        {loading ? (
+          <ActivityIndicator color="#fff" size="small" />
+        ) : (
+          <Text style={styles.buttonText}>
+            {tipoUsuario === 'conductor' ? 'Registrarse como Conductor' : 'Registrarse'}
+          </Text>
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -253,6 +268,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   linkButton: {
     marginTop: 20,

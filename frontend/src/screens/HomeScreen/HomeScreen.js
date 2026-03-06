@@ -14,7 +14,12 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import TransportService from '../../services/transportService';
 import { useAuth } from '../../context/AuthContext';
+import { USE_OSS_MAPS } from '../../config/mapsConfig';
+import OSMMapWebView from '../../components/OSMMapWebView';
 import styles from './HomeScreen.styles';
+
+// En Android con OSM, react-native-maps exige API key de Google; mostramos placeholder para no cerrar la app.
+const ANDROID_OSM_SIN_MAPA = Platform.OS === 'android' && USE_OSS_MAPS;
 
 export default function HomeScreen({ navigation }) {
   const [location, setLocation] = useState({
@@ -154,45 +159,44 @@ export default function HomeScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Mapa */}
+      {/* Mapa: en Android con OSM usamos WebView+Leaflet (sin API key de Google) */}
       <View style={styles.mapContainer}>
-        <MapView
-          style={styles.map}
-          region={region}
-          showsUserLocation
-          mapType="standard"
-        >
-          {solicitudes.map(solicitud => (
-            <Marker
-              key={solicitud.id}
-              coordinate={{
-                latitude: parseFloat(solicitud.origen_lat),
-                longitude: parseFloat(solicitud.origen_lng),
-              }}
-              title={`Solicitud: $${solicitud.precio_solicitado}`}
-              tracksViewChanges={false}
-            >
-              <View style={styles.markerMoto}>
-                <MaterialCommunityIcons
-                  name="motorbike"
-                  size={22}
-                  color="#1A2021"
-                />
-              </View>
-            </Marker>
-          ))}
-          {conductores.map(conductor => {
-            const lat = conductor.ubicacion_actual_lat;
-            const lng = conductor.ubicacion_actual_lng;
-            if (!lat || !lng) return null;
-            return (
+        {ANDROID_OSM_SIN_MAPA ? (
+          <OSMMapWebView
+            style={styles.map}
+            region={region}
+            markers={[
+              ...solicitudes
+                .filter(s => s.origen_lat && s.origen_lng)
+                .map(s => ({
+                  latitude: parseFloat(s.origen_lat),
+                  longitude: parseFloat(s.origen_lng),
+                  title: `Solicitud: $${s.precio_solicitado}`,
+                })),
+              ...conductores
+                .filter(c => c.ubicacion_actual_lat && c.ubicacion_actual_lng)
+                .map(c => ({
+                  latitude: parseFloat(c.ubicacion_actual_lat),
+                  longitude: parseFloat(c.ubicacion_actual_lng),
+                  title: `Conductor: ${c.user__first_name || 'Conductor'}`,
+                })),
+            ]}
+          />
+        ) : (
+          <MapView
+            style={styles.map}
+            region={region}
+            showsUserLocation
+            mapType="standard"
+          >
+            {solicitudes.map(solicitud => (
               <Marker
-                key={`cond-${conductor.id}`}
+                key={solicitud.id}
                 coordinate={{
-                  latitude: parseFloat(lat),
-                  longitude: parseFloat(lng),
+                  latitude: parseFloat(solicitud.origen_lat),
+                  longitude: parseFloat(solicitud.origen_lng),
                 }}
-                title={`Conductor: ${conductor.user__first_name || 'Conductor'}`}
+                title={`Solicitud: $${solicitud.precio_solicitado}`}
                 tracksViewChanges={false}
               >
                 <View style={styles.markerMoto}>
@@ -203,9 +207,33 @@ export default function HomeScreen({ navigation }) {
                   />
                 </View>
               </Marker>
-            );
-          })}
-        </MapView>
+            ))}
+            {conductores.map(conductor => {
+              const lat = conductor.ubicacion_actual_lat;
+              const lng = conductor.ubicacion_actual_lng;
+              if (!lat || !lng) return null;
+              return (
+                <Marker
+                  key={`cond-${conductor.id}`}
+                  coordinate={{
+                    latitude: parseFloat(lat),
+                    longitude: parseFloat(lng),
+                  }}
+                  title={`Conductor: ${conductor.user__first_name || 'Conductor'}`}
+                  tracksViewChanges={false}
+                >
+                  <View style={styles.markerMoto}>
+                    <MaterialCommunityIcons
+                      name="motorbike"
+                      size={22}
+                      color="#1A2021"
+                    />
+                  </View>
+                </Marker>
+              );
+            })}
+          </MapView>
+        )}
       </View>
 
       {/* Panel inferior */}

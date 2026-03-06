@@ -64,7 +64,7 @@ export default function SolicitudesDisponiblesScreen({ navigation }) {
       }
       setLoading(false);
       setRefreshing(false);
-    } catch (e) {
+    } catch (err) {
       setLoading(false);
       setRefreshing(false);
     }

@@ -6,12 +6,15 @@ from decouple import config, Csv, UndefinedValueError
 def get_config_railway(railway_key, standard_key, default, cast=str):
     """Intenta leer variable de Railway primero, luego la estándar, luego default"""
     try:
-        return config(railway_key, default=default, cast=cast)
-    except (UndefinedValueError, ValueError):
-        try:
-            return config(standard_key, default=default, cast=cast)
-        except (UndefinedValueError, ValueError):
-            return default
+        val = config(railway_key, cast=cast)
+        if val is not None and str(val).strip():
+            return val
+    except (UndefinedValueError, ValueError, KeyError):
+        pass
+    try:
+        return config(standard_key, default=default, cast=cast)
+    except (UndefinedValueError, ValueError, KeyError):
+        return default
 
 # DEBUG: Buscar CORE_DEBUG primero (Railway), luego DEBUG
 MY_DEBUG = get_config_railway('CORE_DEBUG', 'DEBUG', True, bool)
@@ -36,21 +39,25 @@ MY_REDIS_PORT = int(REDISPORT_STR) if REDISPORT_STR and REDISPORT_STR.strip() el
 # REDIS_DB: Ya está correcto, Railway usa REDIS_DB
 REDIS_DB_STR = config('REDIS_DB', default='0', cast=str)
 MY_REDIS_DB = int(REDIS_DB_STR) if REDIS_DB_STR and REDIS_DB_STR.strip() else 0
-MY_REDIS_PASSWORD = config('REDIS_PASSWORD', default=None, cast=str)
+_raw_redis_pw = config('REDIS_PASSWORD', default='', cast=str)
+MY_REDIS_PASSWORD = _raw_redis_pw if _raw_redis_pw and _raw_redis_pw.strip() not in ('', 'None') else None
 
 # Redis Cache Configuration
+_redis_opts = {
+    "CLIENT_CLASS": "django_redis.client.DefaultClient",
+    "SOCKET_CONNECT_TIMEOUT": 5,
+    "SOCKET_TIMEOUT": 5,
+    "RETRY_ON_TIMEOUT": True,
+    "MAX_CONNECTIONS": 1000,
+    "CONNECTION_POOL_KWARGS": {"max_connections": 100},
+}
+if MY_REDIS_PASSWORD:
+    _redis_opts["PASSWORD"] = MY_REDIS_PASSWORD
+
 MY_REDIS_CACHE_CONFIG = {
     "BACKEND": "django_redis.cache.RedisCache",
     "LOCATION": f"redis://{MY_REDIS_HOST}:{MY_REDIS_PORT}/{MY_REDIS_DB}",
-    "OPTIONS": {
-        "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        "PASSWORD": MY_REDIS_PASSWORD,
-        "SOCKET_CONNECT_TIMEOUT": 5,
-        "SOCKET_TIMEOUT": 5,
-        "RETRY_ON_TIMEOUT": True,
-        "MAX_CONNECTIONS": 1000,
-        "CONNECTION_POOL_KWARGS": {"max_connections": 100},
-    }
+    "OPTIONS": _redis_opts,
 }
 
 MY_IP_LOAD_BALANCED_INTERNAL = config('IP_LOAD_BALANCED_INTERNAL', default='127.0.0.1', cast=str)

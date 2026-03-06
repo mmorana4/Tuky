@@ -23,11 +23,15 @@ export default function LoginScreen({ navigation }) {
     }
 
     setLoading(true);
-    const result = await login(username, password);
-    setLoading(false);
-
-    if (!result.success) {
-      Alert.alert('Error', result.error);
+    try {
+      const result = await login(username, password);
+      if (!result.success) {
+        Alert.alert('Error', result.error || 'Error al iniciar sesión');
+      }
+    } catch (err) {
+      Alert.alert('Error', err.message || 'Error de conexión. Revisa la red.');
+    } finally {
+      setLoading(false);
     }
   };
 
